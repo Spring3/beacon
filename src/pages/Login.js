@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import AccountBadgeHorizontalOutlineIcon from 'mdi-react/AccountBadgeHorizontalOutlineIcon';
 import { withTheme } from 'emotion-theming';
+import io from 'socket.io-client';
 
 import { Logo } from './components/Logo';
 import { Button } from './components/Button';
@@ -25,6 +26,9 @@ const ButtonsGroup = styled.div`
     margin-bottom: 1rem;
   }
 `;
+
+const socket = io('http://localhost:3000');
+socket.emit('msg', 'Hello world');
 
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
