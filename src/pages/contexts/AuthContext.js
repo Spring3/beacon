@@ -4,12 +4,18 @@ const AuthContext = createContext();
 
 const getAuthContextAPI = () => {
   const providers = {
-    Bamboo: 'bamboo',
+    Slack: 'slack',
     Google: 'google'
   };
 
   const login = (provider) => {
-
+    switch (provider) {
+      case providers.Google:
+        window.open('https://beacon-auth.herokuapp.com/auth/google', '__blank');
+        break;
+      default:
+        window.open('https://beacon-auth.herokuapp.com/auth/google', '__blank');
+    }
   };
 
   return {

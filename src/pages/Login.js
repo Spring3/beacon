@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
-import AccountBadgeHorizontalOutlineIcon from 'mdi-react/AccountBadgeHorizontalOutlineIcon';
+import SlackIcon from 'mdi-react/SlackIcon';
 import { withTheme } from 'emotion-theming';
 import io from 'socket.io-client';
 
@@ -27,9 +27,6 @@ const ButtonsGroup = styled.div`
   }
 `;
 
-const socket = io('http://localhost:3000');
-socket.emit('msg', 'Hello world');
-
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
   return (
@@ -38,13 +35,23 @@ const LoginView = withTheme(({ theme }) => {
       <ButtonsGroup>
         <Button
           type="button"
-          color='green'
+          color='white'
           bold={true}
           fluid={true}
           fill={true}
-          onClick={() => auth.login(auth.providers.Bamboo)}
+          onClick={() => auth.login(auth.providers.Google)}
         >
-          <AccountBadgeHorizontalOutlineIcon/>&nbsp;&nbsp;Sign in with BambooHR
+          <GoogleIcon/>&nbsp;&nbsp;Sign in with Google
+        </Button>
+        <Button
+          type="button"
+          color='white'
+          bold={true}
+          fluid={true}
+          fill={true}
+          onClick={() => auth.login(auth.providers.Slack)}
+        >
+          <SlackIcon/>&nbsp;&nbsp;Sign in with Slack
         </Button>
       </ButtonsGroup>
     </LoginPage>

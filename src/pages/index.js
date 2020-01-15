@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from 'emotion-theming';
 import 'normalize.css';
+import Helmet from 'react-helmet';
 
 import { AuthProvider } from './contexts/AuthContext';
 import { Login } from './Login';
@@ -29,6 +30,8 @@ const theme = {
 
 export default () => (
   <ThemeProvider theme={theme}>
+    <Helmet>
+    </Helmet>
     <AuthProvider>
       <Login />
     </AuthProvider>
