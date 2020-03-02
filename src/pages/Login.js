@@ -3,12 +3,10 @@ import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import SlackIcon from 'mdi-react/SlackIcon';
 import { withTheme } from 'emotion-theming';
-import io from 'socket.io-client';
 
 import { Logo } from './components/Logo';
 import { Button } from './components/Button';
 import { useAuth } from './contexts/AuthContext';
-
 
 const LoginPage = styled.div`
   display: flex;
@@ -29,6 +27,7 @@ const ButtonsGroup = styled.div`
 
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
+
   return (
     <LoginPage>
       <Logo animate={true} size={80} />
