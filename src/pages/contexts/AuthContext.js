@@ -11,6 +11,7 @@ const getAuthContextAPI = () => {
 
   const serverOrigin = process.env.GATSBY_SERVER_ENDPOINT;
   let socket;
+  let isAuthenticated = false;
 
   const setupSocket = (token) => {
     socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
@@ -18,7 +19,20 @@ const getAuthContextAPI = () => {
         token
       }
     });
-    socket.emit('msg', 'Hello');
+    return new Promise((resolve) => {
+      socket.on('authentication', (res) => {
+        console.log('Authentication', res)
+        if (res.isAuthorized) {
+          console.log('Authorized');
+          isAuthenticated = true;
+        } else {
+          isAuthenticated = false;
+          console.error('Authentication failed');
+        }
+        socket.emit('msg', 'Hello');
+        resolve(isAuthenticated);
+      })
+    });
   }
 
   const login = (provider) => {
@@ -32,8 +46,7 @@ const getAuthContextAPI = () => {
         if (!socket && event.origin === serverOrigin) {
           event.source.close();
           window.removeEventListener('message', messageHandler);
-          setupSocket(event.data);
-          return resolve(event.data);
+          return setupSocket(event.data).then(resolve);
         }
         window.removeEventListener('message', messageHandler);
         event.source.close();
@@ -58,11 +71,14 @@ const getAuthContextAPI = () => {
     return res;
   };
 
-  return {
+  const isLoggedIn = () => isAuthenticated;
+
+  return Object.freeze({
+    isLoggedIn,
     providers,
     login,
     me
-  };
+  });
 }
 
 const AuthProvider = ({ children }) => {

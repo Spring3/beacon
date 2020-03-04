@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import SlackIcon from 'mdi-react/SlackIcon';
 import { withTheme } from 'emotion-theming';
 
-import { Logo } from './components/Logo';
-import { Button } from './components/Button';
-import { useAuth } from './contexts/AuthContext';
+import { Logo } from '../components/Logo';
+import { Button } from '../components/Button';
+import { useAuth } from '../contexts/AuthContext';
+import { navigate } from '@reach/router';
 
 const LoginPage = styled.div`
   display: flex;
@@ -28,6 +29,19 @@ const ButtonsGroup = styled.div`
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
 
+  if (auth.isLoggedIn()) {
+    navigate('/app');
+    return null;
+  }
+
+  const authWithGoogle = async () => {
+    const success = await auth.login(auth.providers.Google);
+    console.log('auth result', success);
+    if (success) {
+      navigate('/app');
+    }
+  }
+
   return (
     <LoginPage>
       <Logo animate={true} size={80} />
@@ -38,7 +52,7 @@ const LoginView = withTheme(({ theme }) => {
           bold={true}
           fluid={true}
           fill={true}
-          onClick={() => auth.login(auth.providers.Google)}
+          onClick={authWithGoogle}
         >
           <GoogleIcon/>&nbsp;&nbsp;Sign in with Google
         </Button>

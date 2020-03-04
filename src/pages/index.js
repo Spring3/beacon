@@ -1,10 +1,12 @@
 import React from 'react';
+import { Router } from '@reach/router';
 import { ThemeProvider } from 'emotion-theming';
 import 'normalize.css';
 import Helmet from 'react-helmet';
 
 import { AuthProvider } from './contexts/AuthContext';
-import { Login } from './Login';
+import { Login } from './views/Login';
+import { Application } from './views/Application';
 
 const theme = {
   name: 'light',
@@ -30,10 +32,13 @@ const theme = {
 
 export default () => (
   <ThemeProvider theme={theme}>
-    <Helmet>
-    </Helmet>
+    <Helmet />
     <AuthProvider>
-      <Login />
+      <Router>
+        <Application path="/app" />
+        <Login path="/" />
+      </Router>
     </AuthProvider>
+
   </ThemeProvider>
 );
