@@ -4,9 +4,9 @@ import { ThemeProvider } from 'emotion-theming';
 import 'normalize.css';
 import Helmet from 'react-helmet';
 
-import { AuthProvider } from './contexts/AuthContext';
-import { Login } from './views/Login';
-import { Application } from './views/Application';
+import { AuthProvider } from '../contexts/AuthContext';
+import { Login } from '../views/Login';
+import { Application } from '../views/Application';
 
 const theme = {
   name: 'light',

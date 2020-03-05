@@ -1,15 +1,14 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { navigate } from '@reach/router';
+import { Redirect } from '@reach/router';
 
 const withAuth = (Component) => (props) => {
-  const { isLoggedIn } = useAuth();
+  const auth = useAuth();
 
-  console.log('withAuth -> isLoggedIn', isLoggedIn());
+  console.log('withAuth -> isLoggedIn', auth.isLoggedIn);
 
-  if (!isLoggedIn()) {
-    navigate('/');
-    return null;
+  if (!auth.isLoggedIn) {
+    return <Redirect to='/' noThrow />;
   }
 
   return (

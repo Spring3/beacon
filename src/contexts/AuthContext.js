@@ -1,9 +1,10 @@
 import io from 'socket.io-client';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
-const getAuthContextAPI = () => {
+const useAuthContextAPI = () => {
+  const [isLoggedIn, setLoggedIn] = useState(false);
   const providers = {
     Slack: 'slack',
     Google: 'google'
@@ -11,7 +12,6 @@ const getAuthContextAPI = () => {
 
   const serverOrigin = process.env.GATSBY_SERVER_ENDPOINT;
   let socket;
-  let isAuthenticated = false;
 
   const setupSocket = (token) => {
     socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
@@ -24,13 +24,13 @@ const getAuthContextAPI = () => {
         console.log('Authentication', res)
         if (res.isAuthorized) {
           console.log('Authorized');
-          isAuthenticated = true;
+          setLoggedIn(true);
         } else {
-          isAuthenticated = false;
+          setLoggedIn(false);
           console.error('Authentication failed');
         }
         socket.emit('msg', 'Hello');
-        resolve(isAuthenticated);
+        resolve(isLoggedIn);
       })
     });
   }
@@ -50,7 +50,7 @@ const getAuthContextAPI = () => {
         }
         window.removeEventListener('message', messageHandler);
         event.source.close();
-        reject();
+        reject(new Error('Socket already initialized'));
       }
 
       window.addEventListener('message', messageHandler);
@@ -71,18 +71,16 @@ const getAuthContextAPI = () => {
     return res;
   };
 
-  const isLoggedIn = () => isAuthenticated;
-
-  return Object.freeze({
+  return {
     isLoggedIn,
     providers,
     login,
     me
-  });
+  };
 }
 
 const AuthProvider = ({ children }) => {
-  const api = getAuthContextAPI();
+  const api = useAuthContextAPI();
   return (
     <AuthContext.Provider value={api}>
       {children}

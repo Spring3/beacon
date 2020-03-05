@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import SlackIcon from 'mdi-react/SlackIcon';
@@ -7,7 +7,7 @@ import { withTheme } from 'emotion-theming';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
-import { navigate } from '@reach/router';
+import { Redirect } from '@reach/router';
 
 const LoginPage = styled.div`
   display: flex;
@@ -29,17 +29,8 @@ const ButtonsGroup = styled.div`
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
 
-  if (auth.isLoggedIn()) {
-    navigate('/app');
-    return null;
-  }
-
-  const authWithGoogle = async () => {
-    const success = await auth.login(auth.providers.Google);
-    console.log('auth result', success);
-    if (success) {
-      navigate('/app');
-    }
+  if (auth.isLoggedIn) {
+    return <Redirect to='/app' noThrow />;
   }
 
   return (
@@ -52,7 +43,7 @@ const LoginView = withTheme(({ theme }) => {
           bold={true}
           fluid={true}
           fill={true}
-          onClick={authWithGoogle}
+          onClick={() => auth.login(auth.providers.Google)}
         >
           <GoogleIcon/>&nbsp;&nbsp;Sign in with Google
         </Button>
