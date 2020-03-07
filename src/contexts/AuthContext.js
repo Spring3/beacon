@@ -11,6 +11,7 @@ const useAuthContextAPI = () => {
   };
 
   const serverOrigin = process.env.GATSBY_SERVER_ENDPOINT;
+  let clientId = sessionStorage.getItem('client_id') || undefined;
   let socket;
 
   const setupSocket = (token) => {
@@ -19,23 +20,34 @@ const useAuthContextAPI = () => {
         token
       }
     });
+
     return new Promise((resolve) => {
+      socket.on('disconnect', (reason) => {
+        console.log('socket disconnected due to', reason);
+        socket = undefined;
+        resolve(false);
+      });
+
       socket.on('authentication', (res) => {
         console.log('Authentication', res)
         if (res.isAuthorized) {
+          clientId = res.id;
+          sessionStorage.setItem('client_id', clientId);
           console.log('Authorized');
           setLoggedIn(true);
+          socket.emit('msg', 'Hello');
+          resolve(true);
         } else {
           setLoggedIn(false);
           console.error('Authentication failed');
+          resolve(false);
         }
-        socket.emit('msg', 'Hello');
-        resolve(isLoggedIn);
       })
     });
   }
 
   const login = (provider) => {
+    console.log('logging in');
     return new Promise((resolve, reject) => {
       // if not complete in a minute, reject.
       const timeout = setTimeout(reject, 60000);
@@ -43,14 +55,14 @@ const useAuthContextAPI = () => {
       const messageHandler = (event) => {
         console.log('message', event);
         clearTimeout(timeout);
-        if (!socket && event.origin === serverOrigin) {
+        if (event.origin === serverOrigin) {
           event.source.close();
           window.removeEventListener('message', messageHandler);
           return setupSocket(event.data).then(resolve);
         }
         window.removeEventListener('message', messageHandler);
         event.source.close();
-        reject(new Error('Socket already initialized'));
+        reject();
       }
 
       window.addEventListener('message', messageHandler);
@@ -65,6 +77,41 @@ const useAuthContextAPI = () => {
     });
   };
 
+  const reconnect = () => {
+    return new Promise((resolve) => {
+      if (!clientId) {
+        return resolve(false);
+      }
+
+      if (!isLoggedIn) {
+        socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
+          query: {
+            client: clientId
+          }
+        });
+
+        socket.on('disconnect', (reason) => {
+          console.log('socket disconnected due to', reason);
+          socket = undefined;
+          resolve(false);
+        });
+
+        socket.on('authentication', (res) => {
+          console.log('Authentication', res)
+          if (res.isAuthorized) {
+            console.log('Reconnected');
+            clientId = res.id;
+            setLoggedIn(true);
+            resolve(true);
+          } else {
+            console.error('Authentication failed');
+            resolve(false)
+          }
+        });
+      }
+    });
+  };
+
   const me = async () => {
     const res = await window.fetch(`${origin}/me`);
     console.log('me', res);
@@ -75,6 +122,7 @@ const useAuthContextAPI = () => {
     isLoggedIn,
     providers,
     login,
+    reconnect,
     me
   };
 }

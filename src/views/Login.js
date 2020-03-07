@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import SlackIcon from 'mdi-react/SlackIcon';
@@ -28,6 +28,24 @@ const ButtonsGroup = styled.div`
 
 const LoginView = withTheme(({ theme }) => {
   const auth = useAuth();
+  const [isLoading, setLoading] = useState(true);
+
+  console.log('isLoggedIn', auth.isLoggedIn);
+
+  useEffect(() => {
+    async function restoreConnection() {
+      if (!auth.isLoggedIn) {
+        await auth.reconnect();
+        setLoading(false);
+      }
+    }
+
+    restoreConnection();
+  }, [isLoading, auth.isLoggedIn, auth.reconnect])
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (auth.isLoggedIn) {
     return <Redirect to='/app' noThrow />;
