@@ -1,69 +1,7 @@
-import io from 'socket.io-client';
 import React, { createContext, useContext, useState } from 'react';
+import SocketManager from '../utils/socketManager';
 
 const AuthContext = createContext();
-
-function SocketManager() {
-  this.socket = undefined;
-  this.clientId = undefined;
-  this.setup = (token) => {
-    this.socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-      query: {
-        token
-      }
-    });
-
-    return new Promise((resolve) => {
-      this.socket.on('disconnect', (reason) => {
-        console.log('socket disconnected due to', reason);
-        this.socket = undefined;
-        resolve(false);
-      });
-
-      this.socket.on('authentication', (res) => {
-        console.log('Authentication', res)
-        if (res.isAuthorized) {
-          this.clientId = res.id;
-          sessionStorage.setItem('client_id', this.clientId);
-          console.log('Authorized');
-          this.socket.emit('msg', 'Hello');
-          resolve(true);
-        } else {
-          console.error('Authentication failed');
-          resolve(false);
-        }
-      })
-    });
-  };
-  
-  this.reconnect = (clientId) => {
-    this.socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-      query: {
-        client: clientId
-      }
-    });
-
-    return new Promise((resolve) => {
-      this.socket.on('disconnect', (reason) => {
-        console.log('socket disconnected due to', reason);
-        this.socket = undefined;
-        resolve(false);
-      });
-
-      this.socket.on('authentication', (res) => {
-        console.log('Authentication', res)
-        if (res.isAuthorized) {
-          console.log('Reconnected');
-          resolve(true);
-        } else {
-          console.error('Authentication failed');
-          resolve(false)
-        }
-      });
-    });
-  }
-}
-
 const manager = new SocketManager();
 
 const useAuthContextAPI = () => {
@@ -74,40 +12,6 @@ const useAuthContextAPI = () => {
   };
 
   const serverOrigin = process.env.GATSBY_SERVER_ENDPOINT;
-  // let socket;
-  let clientId = sessionStorage.getItem('client_id') || undefined;
-
-  // const setupSocket = (token) => {
-  //   socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-  //     query: {
-  //       token
-  //     }
-  //   });
-
-  //   return new Promise((resolve) => {
-  //     socket.on('disconnect', (reason) => {
-  //       console.log('socket disconnected due to', reason);
-  //       socket = undefined;
-  //       resolve(false);
-  //     });
-
-  //     socket.on('authentication', (res) => {
-  //       console.log('Authentication', res)
-  //       if (res.isAuthorized) {
-  //         clientId = res.id;
-  //         sessionStorage.setItem('client_id', clientId);
-  //         console.log('Authorized');
-  //         setLoggedIn(true);
-  //         socket.emit('msg', 'Hello');
-  //         resolve(true);
-  //       } else {
-  //         setLoggedIn(false);
-  //         console.error('Authentication failed');
-  //         resolve(false);
-  //       }
-  //     })
-  //   });
-  // }
 
   const login = (provider) => {
     console.log('logging in');
@@ -121,9 +25,9 @@ const useAuthContextAPI = () => {
         if (event.origin === serverOrigin) {
           event.source.close();
           window.removeEventListener('message', messageHandler);
-          return manager.setup(event.data).then((loggedIn) => {
+          return manager.connect(event.data).then((loggedIn) => {
             setLoggedIn(loggedIn);
-            return loggedIn;
+            return resolve(loggedIn);
           });
         }
         window.removeEventListener('message', messageHandler);
@@ -144,53 +48,22 @@ const useAuthContextAPI = () => {
   };
 
   const reconnect = async () => {
-    if (!clientId) {
-      return Promise.resolve(false);
-    }
-
     if (isLoggedIn) {
       return Promise.resolve(true);
     }
 
-    const loggedIn = await manager.reconnect(clientId);
+    const loggedIn = await manager.connect();
     setLoggedIn(loggedIn);
-    return loggedIn;
-
-    // socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-    //   query: {
-    //     client: clientId
-    //   }
-    // });
-
-    // return new Promise((resolve) => {
-    //   socket.on('disconnect', (reason) => {
-    //     console.log('socket disconnected due to', reason);
-    //     socket = undefined;
-    //     resolve(false);
-    //   });
-
-    //   socket.on('authentication', (res) => {
-    //     console.log('Authentication', res)
-    //     if (res.isAuthorized) {
-    //       console.log('Reconnected');
-    //       setLoggedIn(true);
-    //       resolve(true);
-    //     } else {
-    //       console.error('Authentication failed');
-    //       resolve(false)
-    //     }
-    //   });
-    // });
+    return loggedIn; 
   };
 
-  // console.log('socket', socket);
-  console.log('socket', manager.socket);
+  console.log('socket', manager.getSocket());
 
   const logout = async () => {
     console.log('logging out');
-    // socket.emit('logout');
-    manager.socket.emit('logout');
-    const res = await fetch(`${serverOrigin}/logout`, { method: 'POST' });
+    manager.getSocket().emit('logout');
+    manager.resetId();
+    const res = await fetch(`${serverOrigin}/logout`, { method: 'POST', credentials: 'include' });
     const wasLoggedOut = res.status === 200;
     if (wasLoggedOut) {
       setLoggedIn(false);
