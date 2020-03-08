@@ -3,11 +3,12 @@ import styled from '@emotion/styled';
 import GoogleIcon from 'mdi-react/GoogleIcon';
 import SlackIcon from 'mdi-react/SlackIcon';
 import { withTheme } from 'emotion-theming';
+import { Redirect } from '@reach/router';
 
 import { Logo } from '../components/Logo';
+import { Loading } from '../components/Loading';
 import { Button } from '../components/Button';
 import { useAuth } from '../contexts/AuthContext';
-import { Redirect } from '@reach/router';
 
 const LoginPage = styled.div`
   display: flex;
@@ -44,7 +45,7 @@ const LoginView = withTheme(({ theme }) => {
   }, [isLoading, auth.isLoggedIn, auth.reconnect])
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />
   }
 
   if (auth.isLoggedIn) {

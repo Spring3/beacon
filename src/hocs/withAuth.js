@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { Redirect } from '@reach/router';
+
+import { useAuth } from '../contexts/AuthContext';
+import { Loading } from '../components/Loading';
 
 const withAuth = (Component) => (props) => {
   const auth = useAuth();
@@ -20,7 +22,7 @@ const withAuth = (Component) => (props) => {
   console.log('withAuth -> isLoading', isLoading)
 
   if (isLoading) {
-    return <div>Loading</div>;
+    return <Loading />
   }
 
   if (auth.isLoggedIn) {
