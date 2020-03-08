@@ -11,8 +11,8 @@ const useAuthContextAPI = () => {
   };
 
   const serverOrigin = process.env.GATSBY_SERVER_ENDPOINT;
-  let clientId = sessionStorage.getItem('client_id') || undefined;
   let socket;
+  let clientId = sessionStorage.getItem('client_id') || undefined;
 
   const setupSocket = (token) => {
     socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
@@ -78,39 +78,54 @@ const useAuthContextAPI = () => {
   };
 
   const reconnect = () => {
-    return new Promise((resolve) => {
-      if (!clientId) {
-        return resolve(false);
-      }
+    if (!clientId) {
+      return Promise.resolve(false);
+    }
 
-      if (!isLoggedIn) {
-        socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-          query: {
-            client: clientId
-          }
-        });
+    if (isLoggedIn) {
+      return Promise.resolve(true);
+    }
 
-        socket.on('disconnect', (reason) => {
-          console.log('socket disconnected due to', reason);
-          socket = undefined;
-          resolve(false);
-        });
-
-        socket.on('authentication', (res) => {
-          console.log('Authentication', res)
-          if (res.isAuthorized) {
-            console.log('Reconnected');
-            clientId = res.id;
-            setLoggedIn(true);
-            resolve(true);
-          } else {
-            console.error('Authentication failed');
-            resolve(false)
-          }
-        });
+    socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
+      query: {
+        client: clientId
       }
     });
+
+    return new Promise((resolve) => {
+      socket.on('disconnect', (reason) => {
+        console.log('socket disconnected due to', reason);
+        socket = undefined;
+        resolve(false);
+      });
+
+      socket.on('authentication', (res) => {
+        console.log('Authentication', res)
+        if (res.isAuthorized) {
+          console.log('Reconnected');
+          clientId = res.id;
+          setLoggedIn(true);
+          resolve(true);
+        } else {
+          console.error('Authentication failed');
+          resolve(false)
+        }
+      });
+    });
   };
+
+  console.log('socket', socket);
+
+  const logout = async () => {
+    console.log('logging out');
+    socket.emit('logout');
+    const res = await fetch(`${serverOrigin}/logout`, { method: 'POST' });
+    const wasLoggedOut = res.status === 200;
+    if (wasLoggedOut) {
+      setLoggedIn(false);
+    }
+    return wasLoggedOut;
+  }
 
   const me = async () => {
     const res = await window.fetch(`${origin}/me`);
@@ -122,6 +137,7 @@ const useAuthContextAPI = () => {
     isLoggedIn,
     providers,
     login,
+    logout,
     reconnect,
     me
   };
