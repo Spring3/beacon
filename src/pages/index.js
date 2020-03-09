@@ -11,28 +11,31 @@ import { Application } from '../views/Application';
 const theme = {
   name: 'light',
   colors: {
-    background: '#FFFFFF',
-    white: '#FFFFFF',
-    'white-hover': '#000000',
-    black: '#000000',
-    'black-hover': '#FFFFFF',
+    black: '#333333',
     blue: '#3bb4e7',
-    'blue-hover': '#FFFFFF',
+    blueHover: '#FFFFFF',
     yellow: '#ffd85f',
-    'yellow-hover': '#FFFFFF',
+    yellowHover: '#FFFFFF',
     red: '#ed5c68',
-    'red-hover': '#FFFFFF',
-    green: '#84a295',
-    'green-hover': '#FFFFFF',
-  },
-  shadows: {
-    light: 'grey'
+    redHover: '#FFFFFF',
+    border: '#C4C4C4',
+    text: '#333333',
+    textMirror: '#FFFFFF',
+    shadow: '#E0E0E0',
+    shadowLight: '#F4F4F4'
   }
 };
 
 export default () => (
   <ThemeProvider theme={theme}>
-    <Helmet />
+    <Helmet>
+      <style type="text/css">{`
+          * {
+              font-family: 'Noto Sans', 'Open Sans', Helvetica;
+              color: #333;
+          }          
+      `}</style>
+    </Helmet>
     <AuthProvider>
       <Router>
         <Application path="/app" />

@@ -64,7 +64,7 @@ const LoginView = withTheme(({ theme }) => {
           fill={true}
           onClick={() => auth.login(auth.providers.Google)}
         >
-          <GoogleIcon/>&nbsp;&nbsp;Sign in with Google
+          <GoogleIcon/>Sign in with Google
         </Button>
         <Button
           type="button"
@@ -74,7 +74,7 @@ const LoginView = withTheme(({ theme }) => {
           fill={true}
           onClick={() => auth.login(auth.providers.Slack)}
         >
-          <SlackIcon/>&nbsp;&nbsp;Sign in with Slack
+          <SlackIcon/>Sign in with Slack
         </Button>
       </ButtonsGroup>
     </LoginPage>
