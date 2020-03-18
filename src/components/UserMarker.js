@@ -20,29 +20,46 @@ const ripple = keyframes`
   }
 `;
 
-const UserPositionMarger = styled.div`
+const UserPositionMarker = styled.img`
   background-color: #E75A5F;
-  width: 1rem;
-  height: 1rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
   animation: ${ripple} 1.5s linear infinite;
 `;
 
+const MarkerInfoWrapper = styled.div`  
+  position: relative;
+  top: 10px;
+  left: -33%;
+`;
 
-const UserMarker = memo(({ latitude, longitude }) => {
+
+const UserMarker = memo(({ userPhoto, userName, latitude, longitude }) => {
+  const onClick = () => {
+    console.log('Click');
+  };
+
   return (
     <Marker
       latitude={latitude}
       longitude={longitude}
+      captureClick={true}
+      onClick={onClick}
     >
-      <UserPositionMarger />
+      <UserPositionMarker src={userPhoto} alt={userName} />
+      <MarkerInfoWrapper> 
+        <div>{userName}</div>
+      </MarkerInfoWrapper>
     </Marker>
   );
 });
 
 UserMarker.propTypes = {
   latitude: PropTypes.number.isRequired,
-  longitude: PropTypes.number.isRequired
+  longitude: PropTypes.number.isRequired,
+  userPhoto: PropTypes.string.isRequired,
+  userName: PropTypes.string.isRequired
 };
 
 export { UserMarker };

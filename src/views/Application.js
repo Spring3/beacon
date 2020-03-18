@@ -17,6 +17,8 @@ const Application = (props) => {
     auth.logout();
   }
 
+  const { user } = auth;
+
   return (
     <div> 
       <Button
@@ -26,7 +28,10 @@ const Application = (props) => {
         Log out
       </Button>
       <MapWrapper>
-        <Mapbox />
+        <Mapbox
+          userPhoto={user.photo}
+          userName={user.name}
+        />
       </MapWrapper>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl } from 'react-map-gl';
 import bbox from '@turf/bbox';
-
 
 import { useGeolocation } from '../hooks/geolocation';
 import { UserMarker } from './UserMarker';
@@ -42,7 +42,7 @@ mapStyle.layers.push(
   }
 );
 
-const Mapbox = () => {
+const Mapbox = ({ userPhoto, userName }) => {
   const map = useRef();
   const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
   const [viewport, setViewport] = useState();
@@ -105,9 +105,18 @@ const Mapbox = () => {
         showAccuracyCircle={true}
         showUserLocation={true}
       /> */}
-      <UserMarker {...location} />
+      <UserMarker
+        {...location}
+        userPhoto={userPhoto}
+        userName={userName}
+      />
     </MapGL>
   );
 };
+
+Mapbox.propTypes = {
+  userPhoto: PropTypes.string.isRequired,
+  userName: PropTypes.string.isRequired
+}
 
 export default Mapbox;
