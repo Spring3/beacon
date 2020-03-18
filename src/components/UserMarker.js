@@ -6,13 +6,17 @@ import { keyframes } from '@emotion/core';
 
 
 const ripple = keyframes`
-  from {
+  0% {
     box-shadow: 0 0 0 0 rgba(231,90,95, 0.3),
-                0 0 0 .5em rgba(231,90,95, 0.3);
+                0 0 0 .5em rgba(231,90,95, 0.2);
   }
-  to {
+  50% {
     box-shadow: 0 0 0 .25em rgba(231,90,95, 0.3),
-                0 0 0 .5em rgba(231,90,95, 0.3);
+                0 0 0 .5em rgba(231,90,95, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231,90,95, 0.3),
+                0 0 0 .5em rgba(231,90,95, 0.2);
   }
 `;
 

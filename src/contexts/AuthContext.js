@@ -5,6 +5,7 @@ const AuthContext = createContext();
 const manager = new SocketManager();
 
 const useAuthContextAPI = () => {
+  const [user, setUser] = useState({});
   const [isLoggedIn, setLoggedIn] = useState(false);
   const providers = {
     Slack: 'slack',
@@ -19,11 +20,13 @@ const useAuthContextAPI = () => {
       // if not complete in a minute, reject.
       const timeout = setTimeout(reject, 60000);
 
-      const messageHandler = (event) => {
+      const messageHandler = async (event) => {
         console.log('message', event);
         clearTimeout(timeout);
         if (event.origin === serverOrigin) {
           event.source.close();
+          const userInfo = await me();
+          setUser(userInfo);
           window.removeEventListener('message', messageHandler);
           return manager.connect(event.data).then((loggedIn) => {
             setLoggedIn(loggedIn);
@@ -53,6 +56,8 @@ const useAuthContextAPI = () => {
     }
 
     const loggedIn = await manager.connect();
+    const userInfo = await me();
+    setUser(userInfo);
     setLoggedIn(loggedIn);
     return loggedIn; 
   };
@@ -71,19 +76,20 @@ const useAuthContextAPI = () => {
     return wasLoggedOut;
   }
 
-  const me = async () => {
-    const res = await window.fetch(`${origin}/me`);
-    console.log('me', res);
-    return res;
-  };
+  const me = async () => window.fetch(`${serverOrigin}/me`, { credentials: 'include' })
+    .then((res) => res.json())
+    .then((payload) => {
+      console.log('userInfo', payload);
+      return payload;
+    });
 
   return {
+    user,
     isLoggedIn,
     providers,
     login,
     logout,
     reconnect,
-    me
   };
 }
 
