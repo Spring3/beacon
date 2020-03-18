@@ -1,8 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl } from 'react-map-gl';
 import bbox from '@turf/bbox';
-import { geolocated } from 'react-geolocated';
 
+
+import { useGeolocation } from '../hooks/geolocation';
+import { UserMarker } from './UserMarker';
 import MAP_STYLE from '../utils/map-style-basic-v8.json';
 
 // Make a copy of the map style
@@ -40,42 +42,18 @@ mapStyle.layers.push(
   }
 );
 
-const geolocateStyle = {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  margin: 10
-};
-
-const Mapbox = ({
-  coords,
-  /*: {
-    latitude,
-    longitude,
-    altitude,
-    accuracy,
-    altitudeAccuracy,
-    heading,
-    speed,
-  }*/
-  isGeolocationAvailable, // boolean flag indicating that the browser supports the Geolocation API
-  isGeolocationEnabled, // boolean flag indicating that the user has allowed the use of the Geolocation API
-  positionError // object with the error returned from the Geolocation API call
-}) => {
+const Mapbox = () => {
   const map = useRef();
+  const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
   const [viewport, setViewport] = useState();
 
+  console.log('viewport', viewport);
+
   useEffect(() => {
-    if (coords && !viewport) {
-      setViewport({
-        longitude: coords.longitude,
-        latitude: coords.latitude,
-        zoom: 11,
-        bearing: 0,
-        pitch: 0
-      });
+    if (!viewport && location) {
+      setViewport(location);
     }
-  }, [coords])
+  }, [location])
 
   const onClick = (event) => {
     const feature = event.features[0];
@@ -101,16 +79,12 @@ const Mapbox = ({
   }
 
   const updateViewport = (viewport) => {
-    console.log('setting viewport');
+    console.log('setting viewport to', viewport);
     setViewport({ ...viewport })
   }
 
-  console.log('geolocation available', isGeolocationAvailable);
-  console.log('geolocation enabled', isGeolocationEnabled);
-  console.log('coords', coords);
-
   if (!isGeolocationEnabled || !isGeolocationAvailable || !viewport) {
-    return null;
+    return <div>Loading...</div>;
   }
 
   return (
@@ -118,32 +92,22 @@ const Mapbox = ({
       ref={map}
       mapStyle={mapStyle}
       interactiveLayerIds={['sf-neighborhoods-fill']}
-      latitude={viewport.latitude}
-      longitude={viewport.longtitude}
-      zoom={viewport.zoom}
-      bearing={viewport.bearing}
-      pitch={viewport.pitch}
-      width="50%"
-      height="50%"
+      {...viewport}
+      width='100%'
+      height='100%'
       onClick={onClick}
       onViewportChange={updateViewport}
       mapboxApiAccessToken={process.env.GATSBY_MAPBOX_TOKEN}
     >
-      <GeolocateControl
-        style={geolocateStyle}
-        positionOptions={{ enableHighAccuracy: true }}
+      {/* <GeolocateControl
+        positionOptions={{ enableHighAccuracy: true, timeout: 3000 }}
         trackUserLocation={true}
-      />
+        showAccuracyCircle={true}
+        showUserLocation={true}
+      /> */}
+      <UserMarker {...location} />
     </MapGL>
   );
 };
 
-export default geolocated({
-  positionOptions: {
-      enableHighAccuracy: true
-  },
-  watchPosition: true,
-  suppressLocationOnMount: false,
-  geolocationProvider: navigator.geolocation,
-  isOptimisticGeolocationEnabled: true
-})(Mapbox);
+export default Mapbox;

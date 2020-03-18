@@ -2,13 +2,13 @@ import io from 'socket.io-client';
 
 function SocketManager() {
   let socket = undefined;
-  let clientId = sessionStorage.getItem('client_id') || undefined;;
+  let clientId = localStorage.getItem('client_id') || undefined;;
 
   const api = {
     getSocket: () => socket,
     resetId: () => {
       clientId = undefined;
-      sessionStorage.removeItem('client_id');
+      localStorage.removeItem('client_id');
     },
     connect: (token) => {
       if (!clientId && !token) {
@@ -31,7 +31,7 @@ function SocketManager() {
           if (res.isAuthorized) {
             if (token) {
               clientId = res.id;
-              sessionStorage.setItem('client_id', clientId);
+              localStorage.setItem('client_id', clientId);
               console.log('Authorized');
             } else {
               console.log('Reconnected');
