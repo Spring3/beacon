@@ -28,10 +28,9 @@ const useAuthContextAPI = () => {
           const userInfo = await me();
           setUser(userInfo);
           window.removeEventListener('message', messageHandler);
-          return manager.connect(event.data).then((loggedIn) => {
-            setLoggedIn(loggedIn);
-            return resolve(loggedIn);
-          });
+          const loggedIn = await manager.connect(event.data);
+          setLoggedIn(loggedIn);
+          return resolve(loggedIn);
         }
         window.removeEventListener('message', messageHandler);
         event.source.close();
@@ -55,10 +54,19 @@ const useAuthContextAPI = () => {
       return Promise.resolve(true);
     }
 
-    const loggedIn = await manager.connect();
-    const userInfo = await me();
-    setUser(userInfo);
-    setLoggedIn(loggedIn);
+    let loggedIn;
+    try {
+      loggedIn = await manager.connect();
+      const userInfo = await me();
+      setUser(userInfo);
+    } catch (error) {
+      loggedIn = false;
+      // TODO: handle properly
+      console.error(error);
+    } finally {
+      setLoggedIn(loggedIn);
+    }
+    
     return loggedIn; 
   };
 
