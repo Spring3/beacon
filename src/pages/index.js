@@ -5,6 +5,7 @@ import 'normalize.css';
 import Helmet from 'react-helmet';
 
 import { AuthProvider } from '../contexts/AuthContext';
+import { SettingsContextProvider } from '../contexts/SettingsContext';
 import { Login } from '../views/Login';
 import { Application } from '../views/Application';
 
@@ -36,12 +37,13 @@ export default () => (
           }          
       `}</style>
     </Helmet>
-    <AuthProvider>
-      <Router>
-        <Application path="/app" />
-        <Login path="/" />
-      </Router>
-    </AuthProvider>
-
+    <SettingsContextProvider>
+      <AuthProvider>
+        <Router>
+          <Application path="/app" />
+          <Login path="/" />
+        </Router>
+      </AuthProvider>
+    </SettingsContextProvider>
   </ThemeProvider>
 );
