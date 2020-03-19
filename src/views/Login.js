@@ -42,7 +42,7 @@ const LoginView = withTheme(({ theme }) => {
     }
 
     restoreConnection();
-  }, [isLoading, auth.isLoggedIn, auth.reconnect])
+  }, [isLoading, auth.isLoggedIn])
 
   if (isLoading) {
     return <Loading />

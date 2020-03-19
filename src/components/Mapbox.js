@@ -70,9 +70,13 @@ const Mapbox = () => {
       });
     }
     const sock = socket();
-    sock.on('location-update', handleLocationUpdate);
+    if (sock) {
+      sock.on('location-update', handleLocationUpdate);
+    }
     return () => {
-      sock.removeListener('location-update', handleLocationUpdate);
+      if (sock) {
+        sock.removeListener('location-update', handleLocationUpdate);
+      }
     }
   }, []);
 

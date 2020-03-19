@@ -16,7 +16,7 @@ const withAuth = (Component) => (props) => {
       }
     }
     reconnect();
-  }, [isLoading, auth.isLoggedIn, auth.reconnect]);
+  }, [isLoading, auth.isLoggedIn]);
 
   console.log('withAuth -> isLoggedIn', auth.isLoggedIn);
   console.log('withAuth -> isLoading', isLoading)
