@@ -19,8 +19,6 @@ const Application = (props) => {
     auth.logout();
   }
 
-  const { user } = auth;
-
   return (
     <div> 
       <Button
@@ -44,10 +42,7 @@ const Application = (props) => {
         checked={settings.autoNotify}
       />
       <MapWrapper>
-        <Mapbox
-          userPhoto={user.photo}
-          userName={user.name}
-        />
+        <Mapbox/>
       </MapWrapper>
     </div>
   );

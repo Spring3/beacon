@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl } from 'react-map-gl';
 import bbox from '@turf/bbox';
 
+import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { useGeolocation } from '../hooks/geolocation';
 import { UserMarker } from './UserMarker';
 import MAP_STYLE from '../utils/map-style-basic-v8.json';
@@ -42,16 +44,58 @@ mapStyle.layers.push(
   }
 );
 
-const Mapbox = ({ userPhoto, userName }) => {
+const Mapbox = () => {
+  const auth = useAuth();
+  const settings = useSettings();
+
   const map = useRef();
   const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
   const [viewport, setViewport] = useState();
-
+  const [userLocations, setUserLocations] = useState({});
+  
+  const { user, socket } = auth;
   console.log('viewport', viewport);
+
+  useEffect(() => {
+    const handleLocationUpdate = (payload) => {
+      console.log('received [location-update]', payload);
+      const { id, notify, profile = {}, location } = payload;
+      setUserLocations({
+        ...userLocations,
+        [id]: {
+          location,
+          profile,
+          notify
+        }
+      });
+    }
+    const sock = socket();
+    sock.on('location-update', handleLocationUpdate);
+    return () => {
+      sock.removeListener('location-update', handleLocationUpdate);
+    }
+  }, []);
 
   useEffect(() => {
     if (!viewport && location) {
       setViewport(location);
+    }
+
+    if (location) {
+      const payload = { location };
+
+      if (settings.isPublicProfile) {
+        payload.profile = {
+          photo: auth.user.photo,
+          name: auth.user.name
+        };
+      }
+
+      if (settings.autoNotify) {
+        payload.notify = true;
+      }
+
+      socket().emit('location-update', payload);
     }
   }, [location])
 
@@ -107,16 +151,19 @@ const Mapbox = ({ userPhoto, userName }) => {
       /> */}
       <UserMarker
         {...location}
-        userPhoto={userPhoto}
-        userName={userName}
+        userPhoto={user.photo}
+        userName={user.name}
       />
+      {Object.entries(userLocations).map(([id, payload]) => (
+        <UserMarker
+          key={id}
+          {...payload.location}
+          userPhoto={payload.profile.photo}
+          userName={payload.profile.name}
+        />
+      ))}
     </MapGL>
   );
 };
-
-Mapbox.propTypes = {
-  userPhoto: PropTypes.string.isRequired,
-  userName: PropTypes.string.isRequired
-}
 
 export default Mapbox;

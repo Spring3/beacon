@@ -98,6 +98,7 @@ const useAuthContextAPI = () => {
     login,
     logout,
     reconnect,
+    socket: () => manager.getSocket()
   };
 }
 
