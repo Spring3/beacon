@@ -31,14 +31,22 @@ const Application = (props) => {
       <input
         name="public"
         type="checkbox"
-        onChange={settings.toggleProfileVisibility}
+        onChange={() => {
+          const socket = auth.socket();
+          if (socket) {
+            socket.emit('profile-visibility-update', { isPublic: !settings.isPublicProfile });
+          }
+          settings.toggleProfileVisibility();
+        }}
         checked={settings.isPublicProfile}
       />
       <label htmlFor="autoNotify">Notify Automatically</label>
       <input
         name="autoNotify"
         type="checkbox"
-        onChange={settings.toggleAutomaticNotification}
+        onChange={() => {
+          settings.toggleAutomaticNotification();
+        }}
         checked={settings.autoNotify}
       />
       <MapWrapper>

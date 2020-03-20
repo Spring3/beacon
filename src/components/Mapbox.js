@@ -59,20 +59,37 @@ const Mapbox = () => {
   useEffect(() => {
     const handleLocationUpdate = (payload) => {
       console.log('received [location-update]', payload);
-      const { id, notify, profile = {}, location } = payload;
-      setUserLocations({
+      const { id, notify, location } = payload;
+      setUserLocations(userLocations => ({
         ...userLocations,
         [id]: {
           location,
-          profile,
-          notify
+          notify,
+          data: {}
         }
-      });
-      console.log('userLocations', userLocations);
+      }));
     }
+
+    const handleProfileVisibilityUpdate = (payload) => {
+      console.log('received [profile-visibility-update]', payload);
+      const { id, data } = payload;
+      console.log('userLocations', userLocations);
+      console.log('before', userLocations[id]);
+      console.log('after', { ...userLocations[id], data });
+      setUserLocations(userLocations => ({
+        ...userLocations,
+        [id]: {
+          ...userLocations[id],
+          data
+        }
+      }));
+    };
+
+
     const sock = socket();
     if (sock) {
       sock.on('location-update', handleLocationUpdate);
+      sock.on('profile-visibility-update', handleProfileVisibilityUpdate);
     }
     return () => {
       if (sock) {
@@ -88,13 +105,6 @@ const Mapbox = () => {
 
     if (location) {
       const payload = { location };
-
-      if (settings.isPublicProfile) {
-        payload.profile = {
-          photo: auth.user.photo,
-          name: auth.user.name
-        };
-      }
 
       if (settings.autoNotify) {
         payload.notify = true;
@@ -156,15 +166,15 @@ const Mapbox = () => {
       /> */}
       <UserMarker
         {...location}
-        userPhoto={user.photo}
-        userName={user.name}
+        avatar={user.photo}
+        name={user.name}
       />
       {Object.entries(userLocations).map(([id, payload]) => (
         <UserMarker
           key={id}
           {...payload.location}
-          userPhoto={payload.profile.photo}
-          userName={payload.profile.name}
+          avatar={payload.data.photo}
+          name={payload.data.name}
         />
       ))}
     </MapGL>

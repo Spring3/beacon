@@ -26,7 +26,7 @@ const UserPositionMarker = styled.div`
   transition: height 1s ease;
   border-radius: 50%;
   ${props => props.isPublic && css({
-    background: `url('${props.image}') center center`,
+    background: `url('${props.avatar}') center center`,
     backgroundSize: 'contain'
   })}
   width: ${props => props.isPublic ? '2rem' : '.5rem'};
@@ -49,12 +49,12 @@ const MarkerInfoWrapper = styled.div`
 `;
 
 
-const UserMarker = memo(({ userPhoto, userName, latitude, longitude }) => {
+const UserMarker = memo(({ avatar, name, latitude, longitude }) => {
   const onClick = () => {
     console.log('Click');
   };
 
-  const isPublic = userPhoto && userName;
+  const isPublic = !!(avatar && name);
 
   return (
     <Marker
@@ -64,12 +64,12 @@ const UserMarker = memo(({ userPhoto, userName, latitude, longitude }) => {
       onClick={onClick}
     >
       <UserPositionMarker
-        image={userPhoto}
+        avatar={avatar}
         isPublic={isPublic}
       />
       { isPublic && (
         <MarkerInfoWrapper> 
-          <div>{userName}</div>
+          <div>{name}</div>
         </MarkerInfoWrapper>
       )}
     </Marker>
@@ -79,8 +79,8 @@ const UserMarker = memo(({ userPhoto, userName, latitude, longitude }) => {
 UserMarker.propTypes = {
   latitude: PropTypes.number.isRequired,
   longitude: PropTypes.number.isRequired,
-  userPhoto: PropTypes.string,
-  userName: PropTypes.string
+  avatar: PropTypes.string,
+  name: PropTypes.string
 };
 
 export { UserMarker };
