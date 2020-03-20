@@ -68,6 +68,7 @@ const Mapbox = () => {
           notify
         }
       });
+      console.log('userLocations', userLocations);
     }
     const sock = socket();
     if (sock) {

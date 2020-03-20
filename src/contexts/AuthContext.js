@@ -79,6 +79,7 @@ const useAuthContextAPI = () => {
     const res = await fetch(`${serverOrigin}/logout`, { method: 'POST', credentials: 'include' });
     const wasLoggedOut = res.status === 200;
     if (wasLoggedOut) {
+      localStorage.removeItem('client_id');
       setLoggedIn(false);
     }
     return wasLoggedOut;

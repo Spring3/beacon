@@ -8,7 +8,6 @@ function SocketManager() {
     getSocket: () => socket,
     resetId: () => {
       clientId = undefined;
-      localStorage.removeItem('client_id');
     },
     connect: (token) => {
       if (!clientId && !token) {
