@@ -47,7 +47,7 @@ const Application = (props) => {
         onChange={() => {
           const socket = auth.socket();
           if (socket) {
-            socket.emit('settings-update', { isPublicProfile: !settings.isPublicProfile, autoNotify: settings.autoNotify });
+            socket.emit('settings-update', { isPublicProfile: settings.isPublicProfile, autoNotify: !settings.autoNotify });
           }
           settings.toggleAutomaticNotification();
         }}
