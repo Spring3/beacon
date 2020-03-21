@@ -71,7 +71,7 @@ const Mapbox = () => {
     }
 
     const handleProfileVisibilityUpdate = (payload) => {
-      console.log('received [profile-visibility-update]', payload);
+      console.log('received [visibility-update]', payload);
       const { id, data } = payload;
       console.log('userLocations', userLocations);
       console.log('before', userLocations[id]);
@@ -89,7 +89,7 @@ const Mapbox = () => {
     const sock = socket();
     if (sock) {
       sock.on('location-update', handleLocationUpdate);
-      sock.on('profile-visibility-update', handleProfileVisibilityUpdate);
+      sock.on('visibility-update', handleProfileVisibilityUpdate);
     }
     return () => {
       if (sock) {
@@ -103,6 +103,7 @@ const Mapbox = () => {
       setViewport(location);
     }
 
+    const sock = socket();
     if (location) {
       const payload = { location };
 
@@ -110,7 +111,9 @@ const Mapbox = () => {
         payload.notify = true;
       }
 
-      socket().emit('location-update', payload);
+      if (sock) {
+        sock.emit('location-update', payload);
+      }
     }
   }, [location])
 
