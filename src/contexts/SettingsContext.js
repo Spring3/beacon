@@ -4,8 +4,8 @@ const SettingsContext = createContext();
 
 const useSettingsContext = () => {
   const [settings, setSettings] = useState({
-    isPublicProfile: true,
-    autoNotify: true
+    isPublicProfile: false,
+    autoNotify: false
   });
 
   const toggleProfileVisibility = () => {
@@ -16,8 +16,13 @@ const useSettingsContext = () => {
     setSettings({ ...settings, autoNotify: !settings.autoNotify });
   };
 
+  const updateSettings = (settings) => {
+    setSettings(settings);
+  }
+
   return {
     ...settings,
+    updateSettings,
     toggleProfileVisibility,
     toggleAutomaticNotification
   };

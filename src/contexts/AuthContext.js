@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import SocketManager from '../utils/socketManager';
+import socketManager from '../utils/socketManager';
 
 const AuthContext = createContext();
-const manager = new SocketManager();
 
 const useAuthContextAPI = () => {
   const [user, setUser] = useState({});
@@ -28,7 +27,7 @@ const useAuthContextAPI = () => {
           const userInfo = await me();
           setUser(userInfo);
           window.removeEventListener('message', messageHandler);
-          const loggedIn = await manager.connect(event.data);
+          const loggedIn = await socketManager.connect(event.data);
           setLoggedIn(loggedIn);
           return resolve(loggedIn);
         }
@@ -56,7 +55,7 @@ const useAuthContextAPI = () => {
 
     let loggedIn;
     try {
-      loggedIn = await manager.connect();
+      loggedIn = await socketManager.connect();
       const userInfo = await me();
       setUser(userInfo);
     } catch (error) {
@@ -70,12 +69,12 @@ const useAuthContextAPI = () => {
     return loggedIn; 
   };
 
-  console.log('socket', manager.getSocket());
+  console.log('socket', socketManager.getSocket());
 
   const logout = async () => {
     console.log('logging out');
-    manager.getSocket().emit('logout');
-    manager.resetId();
+    socketManager.getSocket().emit('logout');
+    socketManager.resetId();
     const res = await fetch(`${serverOrigin}/logout`, { method: 'POST', credentials: 'include' });
     const wasLoggedOut = res.status === 200;
     if (wasLoggedOut) {
@@ -86,7 +85,8 @@ const useAuthContextAPI = () => {
   }
 
   const me = async () => window.fetch(`${serverOrigin}/me`, { credentials: 'include' })
-    .then((res) => res.json())
+    .then((res) => res.text())
+    .then((text) => text ? JSON.parse(text) : null)
     .then((payload) => {
       console.log('userInfo', payload);
       return payload;
@@ -99,7 +99,7 @@ const useAuthContextAPI = () => {
     login,
     logout,
     reconnect,
-    socket: () => manager.getSocket()
+    socket: () => socketManager.getSocket()
   };
 }
 

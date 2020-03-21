@@ -35,6 +35,7 @@ function SocketManager() {
             } else {
               console.log('Reconnected');
             }
+            sessionStorage.setItem('beacon-settings', JSON.stringify(res.settings));
             resolve(true);
           } else {
             console.error('Authentication failed');
@@ -48,5 +49,7 @@ function SocketManager() {
   return api;
 }
 
+const instance = new SocketManager();
 
-export default SocketManager;
+
+export default instance;
