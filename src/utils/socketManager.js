@@ -9,19 +9,23 @@ function SocketManager() {
     resetId: () => {
       clientId = undefined;
     },
-    connect: (token) => {
+    connect: ({ token, isReconnect }) => {
       if (!clientId && !token) {
         return Promise.resolve(false);
       }
 
       socket = io(process.env.GATSBY_SOCKET_ENDPOINT, {
-        query: token ? { token } : { client: clientId }
+        query: token ? { token } : { client: clientId } 
       });
   
       return new Promise((resolve) => {
         socket.on('disconnect', (reason) => {
           console.log('socket disconnected due to', reason);
-          socket = undefined;
+          if (!isReconnect && reason === 'io server disconnect') {
+            socket.connect();
+          } else if (!isReconnect) {
+            socket = undefined;
+          }
           resolve(false);
         });
   

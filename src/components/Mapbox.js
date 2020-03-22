@@ -52,48 +52,44 @@ const Mapbox = () => {
   const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
   const [viewport, setViewport] = useState();
   const [userLocations, setUserLocations] = useState({});
+  const [userData, setUserData] = useState({});
   
   const { user, socket } = auth;
-  console.log('viewport', viewport);
 
   useEffect(() => {
+    let socketId;
     const handleLocationUpdate = (payload) => {
       console.log('received [location-update]', payload);
-      const { id, notify, location } = payload;
-      setUserLocations(userLocations => ({
-        ...userLocations,
-        [id]: {
-          location,
-          notify,
-          data: {}
-        }
-      }));
+      const { data } = payload;
+      // we don't want to show ourselves twice
+      delete data[socketId];
+      setUserLocations(userLocations => Object.entries({ ...userLocations, ...data})
+        .reduce((acc, [key, value]) => {
+          return !!value ? { ...acc, [key]: value } : acc;
+        }, {})
+      );
     }
 
     const handleProfileVisibilityUpdate = (payload) => {
       console.log('received [visibility-update]', payload);
       const { id, data } = payload;
-      console.log('userLocations', userLocations);
-      console.log('before', userLocations[id]);
-      console.log('after', { ...userLocations[id], data });
-      setUserLocations(userLocations => ({
-        ...userLocations,
-        [id]: {
-          ...userLocations[id],
-          data
-        }
+      setUserData(userData => ({
+        ...userData,
+        [id]: data
       }));
     };
 
 
     const sock = socket();
     if (sock) {
+      socketId = sock.id;
       sock.on('location-update', handleLocationUpdate);
       sock.on('visibility-update', handleProfileVisibilityUpdate);
     }
     return () => {
       if (sock) {
         sock.removeListener('location-update', handleLocationUpdate);
+        sock.removeListener('visibility-update', handleProfileVisibilityUpdate);
       }
     }
   }, []);
@@ -106,10 +102,6 @@ const Mapbox = () => {
     const sock = socket();
     if (location) {
       const payload = { location };
-
-      if (settings.autoNotify) {
-        payload.notify = true;
-      }
 
       if (sock) {
         sock.emit('location-update', payload);
@@ -141,7 +133,6 @@ const Mapbox = () => {
   }
 
   const updateViewport = (viewport) => {
-    console.log('setting viewport to', viewport);
     setViewport({ ...viewport })
   }
 
@@ -172,14 +163,17 @@ const Mapbox = () => {
         avatar={user.photo}
         name={user.name}
       />
-      {Object.entries(userLocations).map(([id, payload]) => (
-        <UserMarker
-          key={id}
-          {...payload.location}
-          avatar={payload.data.photo}
-          name={payload.data.name}
-        />
-      ))}
+      {Object.entries(userLocations).map(([id, location]) => {
+        const { photo, name } = userData[id] || {};
+        return (
+          <UserMarker
+            key={id}
+            {...location}
+            avatar={photo}
+            name={name}
+          />
+        );
+      })}
     </MapGL>
   );
 };

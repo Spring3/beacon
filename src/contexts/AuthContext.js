@@ -27,7 +27,7 @@ const useAuthContextAPI = () => {
           const userInfo = await me();
           setUser(userInfo);
           window.removeEventListener('message', messageHandler);
-          const loggedIn = await socketManager.connect(event.data);
+          const loggedIn = await socketManager.connect({ token: event.data });
           setLoggedIn(loggedIn);
           return resolve(loggedIn);
         }
@@ -55,7 +55,7 @@ const useAuthContextAPI = () => {
 
     let loggedIn;
     try {
-      loggedIn = await socketManager.connect();
+      loggedIn = await socketManager.connect({ isReconnect: true });
       const userInfo = await me();
       setUser(userInfo);
     } catch (error) {
@@ -68,8 +68,6 @@ const useAuthContextAPI = () => {
     
     return loggedIn; 
   };
-
-  console.log('socket', socketManager.getSocket());
 
   const logout = async () => {
     console.log('logging out');

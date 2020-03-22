@@ -21,7 +21,7 @@ const LoadingMessages = [
   'Waiting Daenerys say all her titles...',
   'Whatever you do, don\'t look behind you...',
   'Let\'s hope it\'s worth the wait.',
-  'Distracted by cat gifs.',
+  'Watching cat gifs.',
   'It loaded faster on my side. I swear!',
   'Save water and shower together.',
   'What do you call 8 Hobbits? A Hobbyte.',

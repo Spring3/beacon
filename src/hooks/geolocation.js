@@ -12,16 +12,16 @@ const useGeolocation = () => {
     if (isGeolocationAvailable) {
       const PERMISSION_DENIED = 1;
       const config = {
-        enableHighAccuracy: true,
-        maximumAge: 3000
+        enableHighAccuracy: false,
+        maximumAge: 2000
       };
 
       const onSuccess = (position) => {
         const { coords } = position;
+        console.log('watcher updated location');
         setLocation({
           latitude: coords.latitude,
-          longitude: coords.longitude,
-          speed: coords.speed
+          longitude: coords.longitude
         });
 
         if (!isGeolocationEnabled) {
@@ -40,11 +40,12 @@ const useGeolocation = () => {
         setError(error);
       };
 
+      console.log('initialized gelolocation');
       watcherId = navigator.geolocation.watchPosition(onSuccess, onError, config);
-      navigator.geolocation.getCurrentPosition(onSuccess, onError, config);
     }
     return () => {
       if (isGeolocationEnabled && watcherId) {
+        console.log('watcher cleared');
         navigator.geolocation.clearWatch(watcherId);
       }
     }

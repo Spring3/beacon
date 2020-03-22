@@ -19,7 +19,7 @@ const withAuth = (Component) => (props) => {
       }
     }
     async function reconnect() {
-      if (isLoading && !auth.isLoggedIn) {
+      if ((isLoading && !auth.isLoggedIn) || !auth.socket()) {
         await auth.reconnect();
         updateSettings();
         setLoading(false);
