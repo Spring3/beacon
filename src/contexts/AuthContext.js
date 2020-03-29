@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
-import socketManager from '../utils/socketManager';
+import { useSocket } from './SocketContext';
 
 const AuthContext = createContext();
 
 const useAuthContextAPI = () => {
   const [user, setUser] = useState({});
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const socketApi = useSocket();
+
   const providers = {
     Slack: 'slack',
     Google: 'google'
@@ -27,7 +29,7 @@ const useAuthContextAPI = () => {
           const userInfo = await me();
           setUser(userInfo);
           window.removeEventListener('message', messageHandler);
-          const loggedIn = await socketManager.connect({ token: event.data });
+          const loggedIn = await socketApi.connect({ token: event.data });
           setLoggedIn(loggedIn);
           return resolve(loggedIn);
         }
@@ -55,7 +57,7 @@ const useAuthContextAPI = () => {
 
     let loggedIn;
     try {
-      loggedIn = await socketManager.connect({ isReconnect: true });
+      loggedIn = await socketApi.connect({ isReconnect: true });
       const userInfo = await me();
       setUser(userInfo);
     } catch (error) {
@@ -71,8 +73,7 @@ const useAuthContextAPI = () => {
 
   const logout = async () => {
     console.log('logging out');
-    socketManager.getSocket().emit('logout');
-    socketManager.resetId();
+    socketApi.disconnect();
     const res = await fetch(`${serverOrigin}/logout`, { method: 'POST', credentials: 'include' });
     const wasLoggedOut = res.status === 200;
     if (wasLoggedOut) {
@@ -96,8 +97,7 @@ const useAuthContextAPI = () => {
     providers,
     login,
     logout,
-    reconnect,
-    socket: () => socketManager.getSocket()
+    reconnect
   };
 }
 

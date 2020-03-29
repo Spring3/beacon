@@ -4,6 +4,7 @@ import { ThemeProvider } from 'emotion-theming';
 import 'normalize.css';
 import Helmet from 'react-helmet';
 
+import { SocketProvider } from '../contexts/SocketContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { SettingsContextProvider } from '../contexts/SettingsContext';
 import { Login } from '../views/Login';
@@ -37,13 +38,15 @@ export default () => (
           }          
       `}</style>
     </Helmet>
-    <SettingsContextProvider>
-      <AuthProvider>
-        <Router>
-          <Application path="/app" />
-          <Login path="/" />
-        </Router>
-      </AuthProvider>
-    </SettingsContextProvider>
+    <SocketProvider>
+      <SettingsContextProvider>
+        <AuthProvider>
+          <Router>
+            <Application path="/app" />
+            <Login path="/" />
+          </Router>
+        </AuthProvider>
+      </SettingsContextProvider>
+    </SocketProvider>
   </ThemeProvider>
 );

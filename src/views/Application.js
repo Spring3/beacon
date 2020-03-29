@@ -2,9 +2,11 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { withAuth } from '../hocs/withAuth';
 import { Button } from '../components/Button';
+import { useSocket } from '../contexts/SocketContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Mapbox from '../components/Mapbox';
+import { ClientEvents } from '../enums/socketEvents';
 
 const MapWrapper = styled.div`
   width: 100%;
@@ -13,6 +15,7 @@ const MapWrapper = styled.div`
 
 const Application = (props) => {
   const auth = useAuth();
+  const socketApi = useSocket();
   const settings = useSettings();
 
   const onLogout = (event) => {
@@ -32,10 +35,7 @@ const Application = (props) => {
         name="public"
         type="checkbox"
         onChange={() => {
-          const socket = auth.socket();
-          if (socket) {
-            socket.emit('settings-update', { isPublicProfile: !settings.isPublicProfile, autoNotify: settings.autoNotify });
-          }
+          socketApi.emit(ClientEvents.settingsUpdate, { isPublicProfile: !settings.isPublicProfile, autoNotify: settings.autoNotify });
           settings.toggleProfileVisibility();
         }}
         checked={settings.isPublicProfile}
@@ -45,10 +45,7 @@ const Application = (props) => {
         name="autoNotify"
         type="checkbox"
         onChange={() => {
-          const socket = auth.socket();
-          if (socket) {
-            socket.emit('settings-update', { isPublicProfile: settings.isPublicProfile, autoNotify: !settings.autoNotify });
-          }
+          socketApi.emit(ClientEvents.settingsUpdate, { isPublicProfile: settings.isPublicProfile, autoNotify: !settings.autoNotify });
           settings.toggleAutomaticNotification();
         }}
         checked={settings.autoNotify}

@@ -4,9 +4,10 @@ import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl } from
 import bbox from '@turf/bbox';
 
 import { useAuth } from '../contexts/AuthContext';
-import { useSettings } from '../contexts/SettingsContext';
+import { useSocket } from '../contexts/SocketContext';
 import { useGeolocation } from '../hooks/geolocation';
 import { UserMarker } from './UserMarker';
+import { ServerEvents, ClientEvents } from '../enums/socketEvents';
 import MAP_STYLE from '../utils/map-style-basic-v8.json';
 
 // Make a copy of the map style
@@ -46,7 +47,7 @@ mapStyle.layers.push(
 
 const Mapbox = () => {
   const auth = useAuth();
-  const settings = useSettings();
+  const socketApi = useSocket();
 
   const map = useRef();
   const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
@@ -54,7 +55,7 @@ const Mapbox = () => {
   const [userLocations, setUserLocations] = useState({});
   const [userData, setUserData] = useState({});
   
-  const { user, socket } = auth;
+  const { user } = auth;
 
   useEffect(() => {
     let socketId;
@@ -80,17 +81,14 @@ const Mapbox = () => {
     };
 
 
-    const sock = socket();
-    if (sock) {
-      socketId = sock.id;
-      sock.on('location-update', handleLocationUpdate);
-      sock.on('visibility-update', handleProfileVisibilityUpdate);
+    if (socketApi.isConnected) {
+      socketId = socketApi.id();
+      socketApi.on(ServerEvents.locationUpdate, handleLocationUpdate);
+      socketApi.on(ServerEvents.visibilityUpdate, handleProfileVisibilityUpdate);
     }
     return () => {
-      if (sock) {
-        sock.removeListener('location-update', handleLocationUpdate);
-        sock.removeListener('visibility-update', handleProfileVisibilityUpdate);
-      }
+      socketApi.removeListener(ServerEvents.locationUpdate, handleLocationUpdate);
+      socketApi.removeListener(ServerEvents.visibilityUpdate, handleProfileVisibilityUpdate);
     }
   }, []);
 
@@ -99,13 +97,10 @@ const Mapbox = () => {
       setViewport(location);
     }
 
-    const sock = socket();
     if (location) {
       const payload = { location };
 
-      if (sock) {
-        sock.emit('location-update', payload);
-      }
+      socketApi.emit(ClientEvents.locationUpdate, payload);
     }
   }, [location])
 

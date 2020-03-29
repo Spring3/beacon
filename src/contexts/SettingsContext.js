@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useEffect, useContext, useState } from 'react';
+import { useSocket } from './SocketContext';
+import { ServerEvents } from '../enums/socketEvents';
 
 const SettingsContext = createContext();
 
@@ -7,6 +9,22 @@ const useSettingsContext = () => {
     isPublicProfile: false,
     autoNotify: false
   });
+  const socketApi = useSocket();
+
+  useEffect(() => { 
+    const handleAuthentication = ({ isAuthorized, settings }) => {
+      console.log('handling auth in settings', isAuthorized, settings);
+      if (isAuthorized && settings) {
+        setSettings(settings);
+      }
+    };
+    if (socketApi.isConnected) {
+      socketApi.on(ServerEvents.authentication, handleAuthentication);
+    }
+    return () => {
+      socketApi.removeListener(ServerEvents.authentication, handleAuthentication);
+    }
+  }, [socketApi.isConnected]);
 
   const toggleProfileVisibility = () => {
     setSettings({ ...settings, isPublicProfile: !settings.isPublicProfile });
@@ -16,13 +34,8 @@ const useSettingsContext = () => {
     setSettings({ ...settings, autoNotify: !settings.autoNotify });
   };
 
-  const updateSettings = (settings) => {
-    setSettings(settings);
-  }
-
   return {
     ...settings,
-    updateSettings,
     toggleProfileVisibility,
     toggleAutomaticNotification
   };
