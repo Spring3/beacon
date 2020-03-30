@@ -58,17 +58,17 @@ const Mapbox = () => {
   const { user } = auth;
 
   useEffect(() => {
-    let socketId;
     const handleLocationUpdate = (payload) => {
       console.log('received [location-update]', payload);
       const { data } = payload;
       // we don't want to show ourselves twice
-      delete data[socketId];
+      delete data[socketApi.id()];
       setUserLocations(userLocations => Object.entries({ ...userLocations, ...data})
         .reduce((acc, [key, value]) => {
           return !!value ? { ...acc, [key]: value } : acc;
         }, {})
       );
+      console.log('updatedUserLocations', userLocations);
     }
 
     const handleProfileVisibilityUpdate = (payload) => {
@@ -80,17 +80,35 @@ const Mapbox = () => {
       }));
     };
 
+    const handleSync = (syncPayload) => {
+      console.log('received [sync]', syncPayload);
+      const locations = {};
+      const data = {};
+      for (const [key, payload] of Object.entries(syncPayload)) {
+        if (payload.location) {
+          locations[key] = payload.location;
+        }
+        if (payload.data) {
+          data[key] = payload.data;
+        }
+      }
+      setUserLocations(locations);
+      setUserData(data);
+    }
+
 
     if (socketApi.isConnected) {
-      socketId = socketApi.id();
       socketApi.on(ServerEvents.locationUpdate, handleLocationUpdate);
       socketApi.on(ServerEvents.visibilityUpdate, handleProfileVisibilityUpdate);
+      socketApi.on(ServerEvents.sync, handleSync);
+      socketApi.emit(ClientEvents.sync);
     }
     return () => {
       socketApi.removeListener(ServerEvents.locationUpdate, handleLocationUpdate);
       socketApi.removeListener(ServerEvents.visibilityUpdate, handleProfileVisibilityUpdate);
+      socketApi.removeListener(ServerEvents.sync, handleSync);
     }
-  }, []);
+  }, [socketApi.isConnected]);
 
   useEffect(() => {
     if (!viewport && location) {
