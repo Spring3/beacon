@@ -7,10 +7,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Mapbox from '../components/Mapbox';
 import { ClientEvents } from '../enums/socketEvents';
+import { Navbar } from '../components/Navbar';
 
 const MapWrapper = styled.div`
   width: 100%;
   height: 100vh;
+  position: relative;
 `;
 
 const Application = (props) => {
@@ -23,8 +25,8 @@ const Application = (props) => {
   }
 
   return (
-    <div> 
-      <Button
+    <div>
+      {/* <Button
         type="button"
         onClick={onLogout}
       >
@@ -49,10 +51,11 @@ const Application = (props) => {
           settings.toggleAutomaticNotification();
         }}
         checked={settings.autoNotify}
-      />
+      /> */}
       <MapWrapper>
         <Mapbox/>
       </MapWrapper>
+      <Navbar />
     </div>
   );
 };

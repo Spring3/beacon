@@ -73,11 +73,12 @@ const composingLeft = css`
   animation: ${composeLeft} 1s linear infinite;
 `;
 
-const Logo = withTheme(({ size, animate, theme }) => {
+const Logo = withTheme(({ className, size, animate, theme }) => {
   const { colors } = theme;
   return (
     <LogoSVG
       id="logo"
+      className={className}
       data-name="logo"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 325.00002 375"
@@ -126,6 +127,7 @@ const Logo = withTheme(({ size, animate, theme }) => {
 });
 
 Logo.propTypes = {
+  className: PropTypes.string,
   theme: PropTypes.shape({
     colors: PropTypes.object.isRequired
   }),

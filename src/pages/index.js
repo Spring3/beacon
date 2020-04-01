@@ -24,7 +24,8 @@ const theme = {
     text: '#333333',
     textMirror: '#FFFFFF',
     shadow: '#E0E0E0',
-    shadowLight: '#F4F4F4'
+    shadowLight: '#F4F4F4',
+    white: '#FFFFFF'
   }
 };
 
@@ -42,7 +43,9 @@ export default () => (
       <SettingsContextProvider>
         <AuthProvider>
           <Router>
-            <Application path="/app" />
+            <Application path="/app">
+                { /* TODO: Add profile route */ }
+            </Application>
             <Login path="/" />
           </Router>
         </AuthProvider>
