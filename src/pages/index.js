@@ -16,14 +16,13 @@ const theme = {
   colors: {
     black: '#333333',
     blue: '#3bb4e7',
-    blueHover: '#FFFFFF',
     yellow: '#ffd85f',
-    yellowHover: '#FFFFFF',
     red: '#ed5c68',
-    redHover: '#FFFFFF',
+    blueDisabled: 'rgba(59, 180, 231, .6)',
+    yellowDisabled: 'rgba(255, 216, 95, .6)',
+    redDisabled: 'rgba(237, 92, 104, .6)',
     border: '#C4C4C4',
     text: '#333333',
-    textMirror: '#FFFFFF',
     shadow: '#E0E0E0',
     shadowLight: '#F4F4F4',
     white: '#FFFFFF'

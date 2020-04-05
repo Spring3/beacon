@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@reach/router';
+import { Link, Match } from '@reach/router';
 import AccountOutlineIcon from 'mdi-react/AccountOutlineIcon';
 import AccountIcon from 'mdi-react/AccountIcon';
 import MapOutlineIcon from 'mdi-react/MapOutlineIcon';
@@ -18,7 +18,7 @@ const List = styled.ul`
   list-style-type: none;
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-around;
   background: ${props => props.theme.colors.white};
   margin: 0;
   padding: 10px 0px;
@@ -34,15 +34,33 @@ const Navbar = () => {
       <List>
         <ListItem>
           <Link to="/app">
-            <MapOutlineIcon size={35} />
+            <Match path="/app">
+              {props =>
+                props.match
+                  ? <MapIcon size={35} />
+                  : <MapOutlineIcon size={35} />
+              }
+            </Match>
           </Link>
         </ListItem>
         <ListItem>
-          <Logo size={40} />
+          <Match path="/app">
+            {props =>
+              props.match
+                ? <Logo size={40} />
+                : <Logo size={40} disabled />
+            }
+          </Match>
         </ListItem>
         <ListItem>
           <Link to="profile">
-            <AccountOutlineIcon size={35} />
+            <Match path="/app/profile">
+              {props =>
+                props.match
+                  ? <AccountIcon size={35} />
+                  : <AccountOutlineIcon size={35} />
+              }
+            </Match>
           </Link>
         </ListItem>
       </List>

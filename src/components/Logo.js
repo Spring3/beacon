@@ -73,7 +73,7 @@ const composingLeft = css`
   animation: ${composeLeft} 1s linear infinite;
 `;
 
-const Logo = withTheme(({ className, size, animate, theme }) => {
+const Logo = withTheme(({ className, size, animate, theme, disabled }) => {
   const { colors } = theme;
   return (
     <LogoSVG
@@ -89,37 +89,37 @@ const Logo = withTheme(({ className, size, animate, theme }) => {
       <polygon
         css={animate && composingUp}
         className="outer-blue"
-        fill={colors.blue}
+        fill={disabled ? colors.blueDisabled : colors.blue}
         points="0,93.83 162.53,0 325.05,93.83 283.68,117.86 163.03,48.2 42.38,117.86"
       />
       <polygon
         css={animate && composingLeft}
         className="outer-yellow"
-        fill={colors.yellow}
+        fill={disabled ? colors.yellowDisabled : colors.yellow}
         points="0.06,93.94 0.38,281.73 162.91,375.56 163.09,326.94 42.44,257.29 42.44,117.97"
       />
       <polygon
         css={animate && composingRight}
         className="outer-red"
-        fill={colors.red}
+        fill={disabled ? colors.redDisabled : colors.red}
         points="324.95,93.89 325.33,281.63 162.75,375.5 162.94,326.89 283.59,257.23 283.59,117.91"
       />
       <polygon
         css={animate && spinning}
         className="inner-blue"
-        fill={colors.blue}
+        fill={disabled ? colors.blueDisabled : colors.blue}
         points="253.89,135.22 162.9,82.69 71.92,135.22 119.66,162.41 162.97,137.4 206.28,162.41"
       />
       <polygon
         css={animate && spinning}
         className="inner-yellow"
-        fill={colors.yellow}
+        fill={disabled ? colors.yellowDisabled : colors.yellow}
         points="71.92,135.22 71.92,240.28 162.9,292.81 162.97,237.42 119.66,212.41 119.66,162.41"
       />
       <polygon
         css={animate && spinning}
         className="inner-red"
-        fill={colors.red}
+        fill={disabled ? colors.redDisabled : colors.red}
         points="253.89,135.22 253.89,240.28 162.9,292.81 162.97,237.42 206.28,212.41 206.28,162.41"
       />
     </LogoSVG>
