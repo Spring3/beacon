@@ -33,7 +33,7 @@ const Navbar = () => {
     <Nav>
       <List>
         <ListItem>
-          <Link to="/">
+          <Link to="/app">
             <MapOutlineIcon size={35} />
           </Link>
         </ListItem>
@@ -41,7 +41,7 @@ const Navbar = () => {
           <Logo size={40} />
         </ListItem>
         <ListItem>
-          <Link to="/profile">
+          <Link to="profile">
             <AccountOutlineIcon size={35} />
           </Link>
         </ListItem>

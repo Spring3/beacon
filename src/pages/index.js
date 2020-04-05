@@ -8,7 +8,8 @@ import { SocketProvider } from '../contexts/SocketContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { SettingsContextProvider } from '../contexts/SettingsContext';
 import { Login } from '../views/Login';
-import { Application } from '../views/Application';
+import { Application, Map } from '../views/Application';
+import { Profile } from '../views/Profile';
 
 const theme = {
   name: 'light',
@@ -44,7 +45,8 @@ export default () => (
         <AuthProvider>
           <Router>
             <Application path="/app">
-                { /* TODO: Add profile route */ }
+              <Map path="/" />
+              <Profile path="/profile" />
             </Application>
             <Login path="/" />
           </Router>

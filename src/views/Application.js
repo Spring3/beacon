@@ -15,7 +15,15 @@ const MapWrapper = styled.div`
   position: relative;
 `;
 
-const Application = (props) => {
+const Map = () => {
+  return (
+    <MapWrapper>
+      <Mapbox/>
+    </MapWrapper>
+  );
+};
+
+const Application = ({ children }) => {
   const auth = useAuth();
   const socketApi = useSocket();
   const settings = useSettings();
@@ -52,9 +60,7 @@ const Application = (props) => {
         }}
         checked={settings.autoNotify}
       /> */}
-      <MapWrapper>
-        <Mapbox/>
-      </MapWrapper>
+      {children}
       <Navbar />
     </div>
   );
@@ -63,5 +69,6 @@ const Application = (props) => {
 const PrivateApplicationRoute = withAuth(Application);
 
 export {
-  PrivateApplicationRoute as Application
+  PrivateApplicationRoute as Application,
+  Map
 };
