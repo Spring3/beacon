@@ -15,7 +15,7 @@ const LoginPage = styled.div`
   flex-direction: column;
   justify-content: space-evenly;
   align-items: center;
-  height: 100vh;
+  height: 100%;
 `;
 
 const ButtonsGroup = styled.div`

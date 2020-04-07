@@ -147,20 +147,22 @@ const Mapbox = () => {
     }
   }, [socketApi.isConnected]);
 
+  // when the geolocation api retuned the locaiton for the first time
+  // trigger auto zoom
   useEffect(() => {
-    if (!viewport && location) {
-      setViewport(location);
-      setTimeout(() => {
-        setViewport({
-          ...location,
-          zoom: 10,
-          transitionDuration: 5000,
-          transitionInterpolator: new FlyToInterpolator(),
-          transitionEasing: easeCubic
-        });
-      }, 1000);
+    if (isGeolocationEnabled) {
+      setViewport({
+        ...location,
+        zoom: 10,
+        transitionDuration: 5000,
+        transitionInterpolator: new FlyToInterpolator(),
+        transitionEasing: easeCubic
+      });
     }
+  }, [isGeolocationEnabled]);
 
+  // on each location update, update the server
+  useEffect(() => {
     if (location) {
       const payload = { location };
 
@@ -195,9 +197,11 @@ const Mapbox = () => {
     setViewport({ ...viewport });
   }
 
-  if (!isGeolocationEnabled || !isGeolocationAvailable || !viewport) {
-    return <div>Loading...</div>;
+  if (!isGeolocationAvailable) {
+    return <div>Geolocation is not supported by your browser...</div>;
   }
+
+  const safeViewport = viewport || {};
 
   return (
     <Fragment>
@@ -205,7 +209,7 @@ const Mapbox = () => {
         ref={map}
         mapStyle={mapStyle}
         interactiveLayerIds={['sf-neighborhoods-fill']}
-        {...viewport}
+        {...safeViewport}
         width='100%'
         height='100%'
         // onClick={onClick}
@@ -218,11 +222,16 @@ const Mapbox = () => {
           showAccuracyCircle={true}
           showUserLocation={true}
         /> */}
-        <UserMarker
-          {...location}
-          avatar={user.photo}
-          name={user.name}
-        />
+        {isGeolocationEnabled
+          ? (
+            <UserMarker
+              {...location}
+              avatar={user.photo}
+              name={user.name}
+            />
+          )
+          : null
+        }
         {Object.entries(userLocations).map(([id, location]) => {
           const { photo, name } = userData[id] || {};
           return (
@@ -239,14 +248,17 @@ const Mapbox = () => {
         <RoundFloatingButton
           icon={CrossHairsGpsIcon}
           onClick={() => {
-            setViewport({
-              ...viewport,
-              ...location,
-              zoom: 10,
-              transitionDuration: 5000,
-              transitionInterpolator: new FlyToInterpolator(),
-              transitionEasing: easeCubic
-            })
+            // TODO: animate while isGeolocationEnabled = false
+            if (viewport && isGeolocationEnabled) {
+              setViewport({
+                ...viewport,
+                ...location,
+                zoom: 10,
+                transitionDuration: 5000,
+                transitionInterpolator: new FlyToInterpolator(),
+                transitionEasing: easeCubic
+              })
+            }
           }}
         />
         <RoundFloatingButton

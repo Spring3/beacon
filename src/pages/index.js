@@ -38,6 +38,7 @@ export default () => (
               color: #333;
           }          
       `}</style>
+      <meta name="apple-mobile-web-app-capable" content="yes"></meta>
     </Helmet>
     <SocketProvider>
       <SettingsContextProvider>

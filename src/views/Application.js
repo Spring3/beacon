@@ -2,36 +2,39 @@ import React, { useMemo } from 'react';
 import styled from '@emotion/styled';
 import { withAuth } from '../hocs/withAuth';
 import { Button } from '../components/Button';
-import { useSocket } from '../contexts/SocketContext';
+import { useWindowSize } from '../hooks/useWindowSize';
 import { useAuth } from '../contexts/AuthContext';
 import Mapbox from '../components/Mapbox';
 import { ClientEvents } from '../enums/socketEvents';
 import { Navbar } from '../components/Navbar';
 
 const MapWrapper = styled.div`
-  width: 100%;
-  height: calc(100vh - 60px);
   position: relative;
+  height: ${props => props.height - 60}px;
+  width: 100%;
 `;
 
 const Map = () => {  
+  const windowSize = useWindowSize();
   return useMemo(() => (
-    <MapWrapper>
+    <MapWrapper height={windowSize.height}>
       <Mapbox/>
     </MapWrapper>
-  ), []);
+  ), [windowSize.height, windowSize.width]);
 };
+
+const ApplicationWrapper = styled.div`
+`;
 
 const Application = ({ children }) => {
   const auth = useAuth();
-  const socketApi = useSocket();
 
   const onLogout = (event) => {
     auth.logout();
   }
 
   return (
-    <div>
+    <ApplicationWrapper>
       {/* <Button
         type="button"
         onClick={onLogout}
@@ -60,7 +63,7 @@ const Application = ({ children }) => {
       /> */}
       {children}
       <Navbar />
-    </div>
+    </ApplicationWrapper>
   );
 };
 
