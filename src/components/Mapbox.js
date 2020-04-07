@@ -1,8 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl } from 'react-map-gl';
+import styled from '@emotion/styled';
+import IncognitoIcon from 'mdi-react/IncognitoIcon';
+import IncognitoOffIcon from 'mdi-react/IncognitoOffIcon';
+import CrossHairsGpsIcon from 'mdi-react/CrosshairsGpsIcon';
+import MapGL, { LinearInterpolator, WebMercatorViewport, GeolocateControl, FlyToInterpolator } from 'react-map-gl';
 import bbox from '@turf/bbox';
+import { easeCubic } from 'd3-ease';
 
+import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useGeolocation } from '../hooks/geolocation';
@@ -45,9 +51,40 @@ mapStyle.layers.push(
   }
 );
 
+const RoundFloatingButton = ({ icon, ...props }) => {
+  const Icon = styled(icon)`
+    background: white;
+    padding: 1rem;
+    border-radius: 50%;
+    box-shadow: 0px 0px 10px lightgrey;
+  `;
+
+  return <Icon {...props} />;
+};
+
+const FloatingButtonsList = styled.ul`
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 50px;
+  right: .7rem;
+  display: flex;
+  flex-direction: column;
+
+  svg {
+    cursor: pointer;
+  }
+
+  svg:first-child {
+    margin-bottom: 1rem;
+  }
+`;
+
 const Mapbox = () => {
   const auth = useAuth();
   const socketApi = useSocket();
+  const settings = useSettings();
 
   const map = useRef();
   const [location, isGeolocationAvailable, isGeolocationEnabled, geolocationError] = useGeolocation();
@@ -113,6 +150,15 @@ const Mapbox = () => {
   useEffect(() => {
     if (!viewport && location) {
       setViewport(location);
+      setTimeout(() => {
+        setViewport({
+          ...location,
+          zoom: 10,
+          transitionDuration: 5000,
+          transitionInterpolator: new FlyToInterpolator(),
+          transitionEasing: easeCubic
+        });
+      }, 1000);
     }
 
     if (location) {
@@ -122,31 +168,31 @@ const Mapbox = () => {
     }
   }, [location])
 
-  const onClick = (event) => {
-    const feature = event.features[0];
-    if (feature) {
-      // calculate the bounding box of the feature
-      const [minLng, minLat, maxLng, maxLat] = bbox(feature);
-      // construct a viewport instance from the current state
-      const convertedViewport = new WebMercatorViewport(viewport);
-      const {longitude, latitude, zoom} = convertedViewport.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
-        padding: 40
-      });
+  // const onClick = (event) => {
+  //   const feature = event.features[0];
+  //   if (feature) {
+  //     // calculate the bounding box of the feature
+  //     const [minLng, minLat, maxLng, maxLat] = bbox(feature);
+  //     // construct a viewport instance from the current state
+  //     const convertedViewport = new WebMercatorViewport(viewport);
+  //     const {longitude, latitude, zoom} = convertedViewport.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+  //       padding: 40
+  //     });
 
-      this.setState({
-        longitude,
-        latitude,
-        zoom,
-        transitionInterpolator: new LinearInterpolator({
-          around: [event.offsetCenter.x, event.offsetCenter.y]
-        }),
-        transitionDuration: 1000
-      });
-    }
-  }
+  //     this.setState({
+  //       longitude,
+  //       latitude,
+  //       zoom,
+  //       transitionInterpolator: new LinearInterpolator({
+  //         around: [event.offsetCenter.x, event.offsetCenter.y]
+  //       }),
+  //       transitionDuration: 1000
+  //     });
+  //   }
+  // }
 
   const updateViewport = (viewport) => {
-    setViewport({ ...viewport })
+    setViewport({ ...viewport });
   }
 
   if (!isGeolocationEnabled || !isGeolocationAvailable || !viewport) {
@@ -154,40 +200,61 @@ const Mapbox = () => {
   }
 
   return (
-    <MapGL
-      ref={map}
-      mapStyle={mapStyle}
-      interactiveLayerIds={['sf-neighborhoods-fill']}
-      {...viewport}
-      width='100%'
-      height='100%'
-      onClick={onClick}
-      onViewportChange={updateViewport}
-      mapboxApiAccessToken={process.env.GATSBY_MAPBOX_TOKEN}
-    >
-      {/* <GeolocateControl
-        positionOptions={{ enableHighAccuracy: true, timeout: 3000 }}
-        trackUserLocation={true}
-        showAccuracyCircle={true}
-        showUserLocation={true}
-      /> */}
-      <UserMarker
-        {...location}
-        avatar={user.photo}
-        name={user.name}
-      />
-      {Object.entries(userLocations).map(([id, location]) => {
-        const { photo, name } = userData[id] || {};
-        return (
-          <UserMarker
-            key={id}
-            {...location}
-            avatar={photo}
-            name={name}
-          />
-        );
-      })}
-    </MapGL>
+    <Fragment>
+      <MapGL
+        ref={map}
+        mapStyle={mapStyle}
+        interactiveLayerIds={['sf-neighborhoods-fill']}
+        {...viewport}
+        width='100%'
+        height='100%'
+        // onClick={onClick}
+        onViewportChange={updateViewport}
+        mapboxApiAccessToken={process.env.GATSBY_MAPBOX_TOKEN}
+      >
+        {/* <GeolocateControl
+          positionOptions={{ enableHighAccuracy: true, timeout: 3000 }}
+          trackUserLocation={true}
+          showAccuracyCircle={true}
+          showUserLocation={true}
+        /> */}
+        <UserMarker
+          {...location}
+          avatar={user.photo}
+          name={user.name}
+        />
+        {Object.entries(userLocations).map(([id, location]) => {
+          const { photo, name } = userData[id] || {};
+          return (
+            <UserMarker
+              key={id}
+              {...location}
+              avatar={photo}
+              name={name}
+            />
+          );
+        })}
+      </MapGL>
+      <FloatingButtonsList>
+        <RoundFloatingButton
+          icon={CrossHairsGpsIcon}
+          onClick={() => {
+            setViewport({
+              ...viewport,
+              ...location,
+              zoom: 10,
+              transitionDuration: 5000,
+              transitionInterpolator: new FlyToInterpolator(),
+              transitionEasing: easeCubic
+            })
+          }}
+        />
+        <RoundFloatingButton
+          icon={settings.isPublicProfile ? IncognitoIcon : IncognitoOffIcon}
+          onClick={settings.toggleProfileVisibility}
+        />
+      </FloatingButtonsList>
+    </Fragment>
   );
 };
 
