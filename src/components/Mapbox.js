@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, Fragment } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
 import IncognitoIcon from 'mdi-react/IncognitoIcon';
@@ -204,7 +204,7 @@ const Mapbox = () => {
   const safeViewport = viewport || {};
 
   return (
-    <Fragment>
+    <>
       <MapGL
         ref={map}
         mapStyle={mapStyle}
@@ -266,7 +266,7 @@ const Mapbox = () => {
           onClick={settings.toggleProfileVisibility}
         />
       </FloatingButtonsList>
-    </Fragment>
+    </>
   );
 };
 

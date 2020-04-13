@@ -4,9 +4,11 @@ import { withAuth } from '../hocs/withAuth';
 import { Button } from '../components/Button';
 import { useWindowSize } from '../hooks/useWindowSize';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import Mapbox from '../components/Mapbox';
 import { ClientEvents } from '../enums/socketEvents';
 import { Navbar } from '../components/Navbar';
+import { WelcomeModal } from '../modals/Welcome';
 
 const MapWrapper = styled.div`
   position: relative;
@@ -15,12 +17,17 @@ const MapWrapper = styled.div`
 `;
 
 const Map = () => {  
+  const { user } = useAuth();
   const windowSize = useWindowSize();
+
   return useMemo(() => (
     <MapWrapper height={windowSize.height}>
       <Mapbox/>
+      {!user.departments && !user.teams && (
+        <WelcomeModal />
+      )}
     </MapWrapper>
-  ), [windowSize.height, windowSize.width]);
+  ), [windowSize.height]);
 };
 
 const ApplicationWrapper = styled.div`

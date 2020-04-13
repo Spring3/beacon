@@ -12,6 +12,7 @@ const Nav = styled.nav`
   position: absolute;
   bottom: 0px;
   width: 100%;
+  box-shadow: 0px 0px 10px 0px lightgrey;
 `;
 
 const List = styled.ul`
