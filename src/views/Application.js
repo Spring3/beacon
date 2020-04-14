@@ -6,7 +6,6 @@ import { useWindowSize } from '../hooks/useWindowSize';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import Mapbox from '../components/Mapbox';
-import { ClientEvents } from '../enums/socketEvents';
 import { Navbar } from '../components/Navbar';
 import { WelcomeModal } from '../modals/Welcome';
 
@@ -17,13 +16,13 @@ const MapWrapper = styled.div`
 `;
 
 const Map = () => {  
-  const { user } = useAuth();
+  const settings = useSettings();
   const windowSize = useWindowSize();
 
   return useMemo(() => (
     <MapWrapper height={windowSize.height}>
       <Mapbox/>
-      {!user.departments && !user.teams && (
+      {!settings.departments && !settings.teams && (
         <WelcomeModal />
       )}
     </MapWrapper>
