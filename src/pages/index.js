@@ -23,6 +23,7 @@ const theme = {
     redDisabled: 'rgba(237, 92, 104, .6)',
     border: '#C4C4C4',
     text: '#333333',
+    textLight: '#FFFFFF',
     shadow: '#E0E0E0',
     shadowLight: '#F4F4F4',
     white: '#FFFFFF'
