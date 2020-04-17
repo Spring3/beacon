@@ -39,6 +39,8 @@ const Tag = styled.li`
   border-radius: 3px;
   cursor: pointer;
 
+  user-select: none;
+
   &:hover {
     border-color: silver;
   }
@@ -46,19 +48,12 @@ const Tag = styled.li`
 
 const WelcomeModal = () => {
   const socket = useSocket();
-  const [serverData, setServerData] = useState({
-    departments: [],
-    teams: []
-  });
-  const [selectedDepartments, setSelectedDepartments] = useState([]);
-  const [selectedTeams, setSelectedTeams] = useState([]);
+  const [allDepartments, setAllDepartments] = useState([]);
+  const [selectedDepartments, setSelectedDepartments] = useState({});
 
   useEffect(() => {
     const handleResponse = (response) => {
-      setServerData({
-        departments: response.data.departments,
-        teams: response.data.teams
-      });
+      setAllDepartments(response.data.departments);
     };
 
     socket.on(ServerEvents.organizationUnits, handleResponse);
@@ -70,24 +65,56 @@ const WelcomeModal = () => {
     };
   }, []);
 
-  const toggleTeam = (id) => {
-    if (!selectedTeams.includes(id)) {
-      setSelectedTeams([...selectedTeams, id]);
-    } else {
-      setSelectedTeams(selectedTeams.filter(teamId => teamId !== id));
-    }
+  const toggleTeam = (departmentId, teamId) => {
+    const mapOfTeams = selectedDepartments[departmentId];
+    mapOfTeams[teamId].isSelected = !mapOfTeams[teamId].isSelected;
+    setSelectedDepartments({
+      ...selectedDepartments,
+      [departmentId]: { ...mapOfTeams }
+    });
   };
 
   const toggleDepartment = (id) => {
-    console.log('id', id);
-    if (!selectedDepartments.includes(id)) {
-      setSelectedDepartments([...selectedDepartments, id]);
+    if (!selectedDepartments[id]) {
+      const department = allDepartments.find((department) => department._id === id);
+      setSelectedDepartments({
+        ...selectedDepartments,
+        [id]: department.teams.reduce((acc, team) => ({ ...acc, [team._id]: { isSelected: false, color: team.color, name: team.name } }), {})
+      });
     } else {
-      setSelectedDepartments(selectedDepartments.filter(departmentId => departmentId !== id));
+      const selectedDepartmentsCopy = { ...selectedDepartments };
+      delete selectedDepartmentsCopy[id];
+      setSelectedDepartments(selectedDepartmentsCopy);
     }
   };
 
   const onSubmit = () => {};
+
+  const renderListOfTeams = (departmentId, mapOfTeams) => {
+    const { name } = allDepartments.find(department => department._id === departmentId);
+    return (
+      <>
+        <h3>Which team(s) of {name} department?</h3>
+        {
+          Object.entries(mapOfTeams).map(
+            ([id, team]) => (
+              <Tag
+                key={id}
+                color={team.color}
+                isLight={isLight(team.color)}
+                isSelected={selectedDepartments[departmentId][id].isSelected}
+                onClick={() => toggleTeam(departmentId, id)}
+              >
+                {team.name}
+              </Tag>
+            )
+          )
+        }
+      </>
+    );
+  }
+
+  const entriesOfSelectedDepartmentsWithTeams = Object.entries(selectedDepartments).filter(([_, mapOfTeams]) => !!Object.keys(mapOfTeams).length);
 
   return (
     <Container>
@@ -95,31 +122,22 @@ const WelcomeModal = () => {
         <h1>Welcome to Beacon!</h1>
         <h3>Please select your department(s)*</h3>
         <TagList>
-          {serverData.departments.map((department) => (
+          {allDepartments.map((department) => (
             <Tag
               key={department._id}
               color={department.color}
               isLight={isLight(department.color)}
-              isSelected={selectedDepartments.includes(department._id)}
+              isSelected={!!selectedDepartments[department._id]}
               onClick={() => toggleDepartment(department._id)}
             >
               {department.name}
             </Tag>
           ))}
         </TagList>
-        <h3>Please select your team(s)</h3>
         <TagList>
-          {serverData.teams.map((team) => (
-            <Tag
-              key={team._id}
-              color={team.color}
-              isLight={isLight(team.color)}
-              isSelected={selectedTeams.includes(team._id)}
-              onClick={() => toggleTeam(team._id)}
-            >
-              {team.name}
-            </Tag>
-          ))}
+          {entriesOfSelectedDepartmentsWithTeams.map(
+            ([departmentId, mapOfTeams]) => renderListOfTeams(departmentId, mapOfTeams)
+          )}
         </TagList>
         <Button fluid type="submit">Submit</Button>
       </form>
