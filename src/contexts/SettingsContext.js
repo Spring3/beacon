@@ -7,7 +7,8 @@ const SettingsContext = createContext();
 const useSettingsContext = () => {
   const [settings, setSettings] = useState({
     isPublicProfile: false,
-    autoNotify: false
+    autoNotify: false,
+    departments: undefined
   });
   const socketApi = useSocket();
 
@@ -34,10 +35,18 @@ const useSettingsContext = () => {
     setSettings({ ...settings, autoNotify: !settings.autoNotify });
   };
 
+  const setDepartments = (arrayOfDepartments) => {
+    setSettings({
+      ...settings,
+      departments: arrayOfDepartments
+    });
+  }
+
   return {
     ...settings,
     toggleProfileVisibility,
-    toggleAutomaticNotification
+    toggleAutomaticNotification,
+    setDepartments
   };
 }
 

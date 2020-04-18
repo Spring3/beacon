@@ -21,7 +21,7 @@ const Map = () => {
 
   return useMemo(() => (
     <MapWrapper height={windowSize.height}>
-      <Mapbox/>
+      <Mapbox />
       {!settings.departments && (
         <WelcomeModal />
       )}

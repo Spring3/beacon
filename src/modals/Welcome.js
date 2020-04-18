@@ -6,6 +6,7 @@ import { ClientEvents, ServerEvents } from '../enums/socketEvents';
 import { isLight } from '../utils/color';
 import { Button } from '../components/Button';
 import { ErrorMessage } from '../components/Messages';
+import { useSettings } from '../contexts/SettingsContext';
 
 const Container = styled.div`
   position: absolute;
@@ -53,6 +54,7 @@ const SubmitButton = styled(Button)`
 
 const WelcomeModal = () => {
   const socket = useSocket();
+  const settings = useSettings();
   const [allDepartments, setAllDepartments] = useState([]);
   const [error, setError] = useState();
   const [selectedDepartments, setSelectedDepartments] = useState({});
@@ -98,31 +100,39 @@ const WelcomeModal = () => {
     }
   };
 
-  const onSubmit = () => {
-
+  const onSubmit = (event) => {
+    event.preventDefault();
+    const selectedDepartmentIds = Object.keys(selectedDepartments);
+    const departments = allDepartments
+      .filter(department => selectedDepartmentIds.includes(department._id))
+      .map((department) => {
+        if (department.teams.length) {
+          return {
+            ...department,
+            teams: department.teams.filter((team) => selectedDepartments[department._id][team._id].isSelected)
+          };
+        }
+        return department;
+      });
+    console.log(departments);
+    settings.setDepartments(departments);
+    socket.emit('update-settings', { data: departments });
+    // TODO: navigate next
   };
 
   const renderListOfTeams = (departmentId, mapOfTeams) => {
-    const { name } = allDepartments.find(department => department._id === departmentId);
-    return (
-      <>
-        <h3>Which team(s) of {name} department?</h3>
-        {
-          Object.entries(mapOfTeams).map(
-            ([id, team]) => (
-              <Tag
-                key={id}
-                color={team.color}
-                isLight={isLight(team.color)}
-                isSelected={selectedDepartments[departmentId][id].isSelected}
-                onClick={() => toggleTeam(departmentId, id)}
-              >
-                {team.name}
-              </Tag>
-            )
-          )
-        }
-      </>
+    return Object.entries(mapOfTeams).map(
+      ([id, team]) => (
+        <Tag
+          key={id}
+          color={team.color}
+          isLight={isLight(team.color)}
+          isSelected={selectedDepartments[departmentId][id].isSelected}
+          onClick={() => toggleTeam(departmentId, id)}
+        >
+          {team.name}
+        </Tag>
+      )
     );
   }
 
@@ -135,7 +145,6 @@ const WelcomeModal = () => {
     hasNotSelectedASingleTeam = true;
     for (const [_, mapOfTeams] of entriesOfSelectedDepartmentsWithTeams) {
       for (const team of Object.values(mapOfTeams)) {
-        console.log(team);
         if (team.isSelected) {
           hasNotSelectedASingleTeam = false;
         }
@@ -168,7 +177,15 @@ const WelcomeModal = () => {
         </TagList>
         <TagList>
           {entriesOfSelectedDepartmentsWithTeams.map(
-            ([departmentId, mapOfTeams]) => renderListOfTeams(departmentId, mapOfTeams)
+            ([departmentId, mapOfTeams]) => {
+              const { name } = allDepartments.find(department => department._id === departmentId);
+              return (
+                <div key={departmentId}>
+                  <h3>Which team(s) of {name} department?</h3> 
+                  {renderListOfTeams(departmentId, mapOfTeams)}
+                </div>
+              );
+            }
           )}
         </TagList>
         {validationError ? <ErrorMessage>{validationError.message}</ErrorMessage> : null}
