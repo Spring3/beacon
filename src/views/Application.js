@@ -4,10 +4,8 @@ import { withAuth } from '../hocs/withAuth';
 import { Button } from '../components/Button';
 import { useWindowSize } from '../hooks/useWindowSize';
 import { useAuth } from '../contexts/AuthContext';
-import { useSettings } from '../contexts/SettingsContext';
 import Mapbox from '../components/Mapbox';
 import { Navbar } from '../components/Navbar';
-import { WelcomeModal } from '../modals/Welcome';
 
 const MapWrapper = styled.div`
   position: relative;
@@ -15,16 +13,12 @@ const MapWrapper = styled.div`
   width: 100%;
 `;
 
-const Map = () => {  
-  const settings = useSettings();
+const Map = () => {
   const windowSize = useWindowSize();
 
   return useMemo(() => (
     <MapWrapper height={windowSize.height}>
       <Mapbox />
-      {!settings.departments && (
-        <WelcomeModal />
-      )}
     </MapWrapper>
   ), [windowSize.height]);
 };

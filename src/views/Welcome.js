@@ -7,10 +7,12 @@ import { isLight } from '../utils/color';
 import { Button } from '../components/Button';
 import { ErrorMessage } from '../components/Messages';
 import { useSettings } from '../contexts/SettingsContext';
+import { TagList, Tag } from '../components/TagList';
 
 const Container = styled.div`
   position: absolute;
   top: 0;
+  left: 0;
   z-index: 2;
   background: white;
   height: 100%;
@@ -19,40 +21,11 @@ const Container = styled.div`
   box-sizing: border-box;
 `;
 
-const TagList = styled.ul`
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-`;
-
-const Tag = styled.li`
-  padding: 12px 14px;
-  margin: 5px;
-  display: inline-block;
-  background-color: ${props => props.isSelected ? props.color : '#E8E8E8'};
-  color: ${props => props.isSelected
-    ? props.isLight
-      ? props.theme.colors.text
-      : props.theme.colors.textLight
-    : props.theme.colors.text
-  };
-  text-transform: capitalize;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  cursor: pointer;
-
-  user-select: none;
-
-  &:hover {
-    border-color: silver;
-  }
-`;
-
 const SubmitButton = styled(Button)`
   margin-top: 2rem;
 `;
 
-const WelcomeModal = () => {
+const Welcome = ({ children }) => {
   const socket = useSocket();
   const settings = useSettings();
   const [allDepartments, setAllDepartments] = useState([]);
@@ -116,7 +89,7 @@ const WelcomeModal = () => {
       });
     console.log(departments);
     settings.setDepartments(departments);
-    socket.emit('update-settings', { data: departments });
+    socket.emit('settings-update', { data: departments });
     // TODO: navigate next
   };
 
@@ -156,6 +129,10 @@ const WelcomeModal = () => {
     }
   }
   const isSubmitDisabled = !!validationError || !Object.keys(selectedDepartments).length || (hasSelectedDepartmentWithTeams && hasNotSelectedASingleTeam);
+
+  if (Array.isArray(settings.departments) && settings.departments.length) {
+    return children;
+  }
 
   return (
     <Container>
@@ -202,5 +179,5 @@ const WelcomeModal = () => {
 };
 
 export {
-  WelcomeModal
+  Welcome
 };

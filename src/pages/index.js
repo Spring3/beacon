@@ -10,6 +10,7 @@ import { SettingsContextProvider } from '../contexts/SettingsContext';
 import { Login } from '../views/Login';
 import { Application, Map } from '../views/Application';
 import { Profile } from '../views/Profile';
+import { Welcome } from '../views/Welcome';
 
 const theme = {
   name: 'light',
@@ -47,8 +48,10 @@ export default () => (
         <AuthProvider>
           <Router>
             <Application path="/app">
-              <Map path="/" />
-              <Profile path="/profile" />
+              <Welcome path='/'>
+                <Map path="/" />
+                <Profile path="/profile" />
+              </Welcome>
             </Application>
             <Login path="/" />
           </Router>
