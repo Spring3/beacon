@@ -26,7 +26,8 @@ const theme = {
     textLight: '#FFFFFF',
     shadow: '#E0E0E0',
     shadowLight: '#F4F4F4',
-    white: '#FFFFFF'
+    white: '#FFFFFF',
+    disabled: '#E4E4E4'
   }
 };
 
@@ -35,8 +36,8 @@ export default () => (
     <Helmet>
       <style type="text/css">{`
           * {
-              font-family: 'Noto Sans', 'Open Sans', Helvetica;
-              color: #333;
+            font-family: 'Noto Sans', 'Open Sans', Helvetica;
+            color: #333;
           }          
       `}</style>
       <meta name="apple-mobile-web-app-capable" content="yes"></meta>

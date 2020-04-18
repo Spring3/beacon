@@ -5,6 +5,7 @@ import { useSocket } from '../contexts/SocketContext';
 import { ClientEvents, ServerEvents } from '../enums/socketEvents';
 import { isLight } from '../utils/color';
 import { Button } from '../components/Button';
+import { ErrorMessage } from '../components/Messages';
 
 const Container = styled.div`
   position: absolute;
@@ -24,7 +25,7 @@ const TagList = styled.ul`
 `;
 
 const Tag = styled.li`
-  padding: 8px 10px;
+  padding: 12px 14px;
   margin: 5px;
   display: inline-block;
   background-color: ${props => props.isSelected ? props.color : '#E8E8E8'};
@@ -46,9 +47,14 @@ const Tag = styled.li`
   }
 `;
 
+const SubmitButton = styled(Button)`
+  margin-top: 2rem;
+`;
+
 const WelcomeModal = () => {
   const socket = useSocket();
   const [allDepartments, setAllDepartments] = useState([]);
+  const [error, setError] = useState();
   const [selectedDepartments, setSelectedDepartments] = useState({});
 
   useEffect(() => {
@@ -81,14 +87,20 @@ const WelcomeModal = () => {
         ...selectedDepartments,
         [id]: department.teams.reduce((acc, team) => ({ ...acc, [team._id]: { isSelected: false, color: team.color, name: team.name } }), {})
       });
+      setError(undefined);
     } else {
       const selectedDepartmentsCopy = { ...selectedDepartments };
       delete selectedDepartmentsCopy[id];
       setSelectedDepartments(selectedDepartmentsCopy);
+      if (!Object.keys(selectedDepartmentsCopy).length) {
+        setError(new Error('Please select at least one department'));
+      }
     }
   };
 
-  const onSubmit = () => {};
+  const onSubmit = () => {
+
+  };
 
   const renderListOfTeams = (departmentId, mapOfTeams) => {
     const { name } = allDepartments.find(department => department._id === departmentId);
@@ -115,12 +127,32 @@ const WelcomeModal = () => {
   }
 
   const entriesOfSelectedDepartmentsWithTeams = Object.entries(selectedDepartments).filter(([_, mapOfTeams]) => !!Object.keys(mapOfTeams).length);
+  const hasSelectedDepartmentWithTeams = !!entriesOfSelectedDepartmentsWithTeams.length;
+  let hasNotSelectedASingleTeam = false;
+  let validationError = error;
+
+  if (hasSelectedDepartmentWithTeams) {
+    hasNotSelectedASingleTeam = true;
+    for (const [_, mapOfTeams] of entriesOfSelectedDepartmentsWithTeams) {
+      for (const team of Object.values(mapOfTeams)) {
+        console.log(team);
+        if (team.isSelected) {
+          hasNotSelectedASingleTeam = false;
+        }
+      }
+    }
+
+    if (hasNotSelectedASingleTeam) {
+      validationError = new Error('Please select at least one team per department');
+    }
+  }
+  const isSubmitDisabled = !!validationError || !Object.keys(selectedDepartments).length || (hasSelectedDepartmentWithTeams && hasNotSelectedASingleTeam);
 
   return (
     <Container>
       <form onSubmit={onSubmit}>
         <h1>Welcome to Beacon!</h1>
-        <h3>Please select your department(s)*</h3>
+        <h3>Please select your department(s)</h3>
         <TagList>
           {allDepartments.map((department) => (
             <Tag
@@ -139,7 +171,14 @@ const WelcomeModal = () => {
             ([departmentId, mapOfTeams]) => renderListOfTeams(departmentId, mapOfTeams)
           )}
         </TagList>
-        <Button fluid type="submit">Submit</Button>
+        {validationError ? <ErrorMessage>{validationError.message}</ErrorMessage> : null}
+        <SubmitButton
+          fluid
+          type="submit"
+          disabled={isSubmitDisabled}
+        >
+          Submit
+        </SubmitButton>
       </form>
     </Container>
   );

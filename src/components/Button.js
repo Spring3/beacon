@@ -27,23 +27,32 @@ const Button = styled.button`
   }
 
   &:hover,
-  &:focus {
+  &:focus,
+  &:not:disabled {
     box-shadow: 0px 0px 10px ${({ theme }) => theme.colors.shadow};
   }
   
-  &:active {
+  &:active
+  &:not:disabled {
     box-shadow: 0px 0px 0px transparent;
     background: ${props => props.theme.colors.shadowLight};
+  }
+
+  &:disabled {
+    background: ${props => props.theme.colors.disabled};
+    cursor: not-allowed
   }
 `;
 
 Button.propTypes = {
+  disabled: PropTypes.bool,
   bold: PropTypes.bool,
   fill: PropTypes.bool,
   fluid: PropTypes.bool
 };
 
 Button.defaultProps = {
+  disabled: false,
   bold: false,
   fill: true,
   fluid: false
