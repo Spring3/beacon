@@ -28,11 +28,15 @@ const useSettingsContext = () => {
   }, [socketApi.isConnected]);
 
   const toggleProfileVisibility = () => {
-    setSettings({ ...settings, isPublicProfile: !settings.isPublicProfile });
+    const newValue = !settings.isPublicProfile;
+    setSettings({ ...settings, isPublicProfile: newValue });
+    return newValue;
   };
 
   const toggleAutomaticNotification = () => {
-    setSettings({ ...settings, autoNotify: !settings.autoNotify });
+    const newValue = !settings.autoNotify;
+    setSettings({ ...settings, autoNotify: newValue });
+    return newValue;
   };
 
   const setDepartments = (arrayOfDepartments) => {

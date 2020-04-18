@@ -263,7 +263,10 @@ const Mapbox = () => {
         />
         <RoundFloatingButton
           icon={settings.isPublicProfile ? IncognitoIcon : IncognitoOffIcon}
-          onClick={settings.toggleProfileVisibility}
+          onClick={() => {
+            const newValue = settings.toggleProfileVisibility();
+            socketApi.emit(ClientEvents.settingsUpdate, { data: { isPublicProfile: newValue } });
+          }}
         />
       </FloatingButtonsList>
     </>

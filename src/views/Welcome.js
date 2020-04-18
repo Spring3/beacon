@@ -89,7 +89,11 @@ const Welcome = ({ children }) => {
       });
     console.log(departments);
     settings.setDepartments(departments);
-    socket.emit('settings-update', { data: departments });
+    const justIds = departments.map((department) => ({
+      _id: department._id,
+      teams: department.teams.map((team) => team._id)
+    }));
+    socket.emit(ClientEvents.settingsUpdate, { data: { departments: justIds } });
     // TODO: navigate next
   };
 

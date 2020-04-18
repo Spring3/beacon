@@ -8,6 +8,8 @@ import { Button } from '../components/Button';
 import { TagList, Tag } from '../components/TagList';
 import { EditableSection } from '../components/EditableSection';
 import { useSettings } from '../contexts/SettingsContext';
+import { useSocket } from '../contexts/SocketContext';
+import { ClientEvents } from '../enums/socketEvents';
 
 const Wrapper = styled.div`
   display: flex;
@@ -57,6 +59,7 @@ const SettingsList = styled.ul`
 
 const Profile = () => {
   const { logout, user } = useAuth();
+  const socket = useSocket();
   const { autoNotify, toggleAutomaticNotification, departments } = useSettings();
   return (
     <Wrapper>
@@ -75,7 +78,10 @@ const Profile = () => {
             <Toggle
               checked={autoNotify}
               icons={false}
-              onChange={toggleAutomaticNotification} />
+              onChange={() => {
+                const newValue = toggleAutomaticNotification();
+                socket.emit(ClientEvents.settingsUpdate, { data: { autoNotify: newValue } })
+              }} />
           </label>
         </li>
         <li>
@@ -84,7 +90,10 @@ const Profile = () => {
             <Toggle
               checked={autoNotify}
               icons={false}
-              onChange={toggleAutomaticNotification} />
+              onChange={() => {
+                const newValue = toggleAutomaticNotification();
+                socket.emit(ClientEvents.settingsUpdate, { data: { autoNotify: newValue } });
+              }} />
           </label>
         </li>
       </SettingsList>
