@@ -7,11 +7,11 @@ import { ErrorMessage } from './Messages';
 import { TagList, Tag } from './TagList';
 import { Button } from './Button';
 
-const SubmitButton = styled(Button)`
+const StyledButton = styled(Button)`
   margin-top: 2rem;
 `;
 
-const DepartmentSelector = ({ onSubmit }) => {
+const DepartmentSelector = ({ onSubmit, onCancel }) => {
   const socket = useSocket();
   const [allDepartments, setAllDepartments] = useState([]);
   const [error, setError] = useState();
@@ -148,13 +148,24 @@ const DepartmentSelector = ({ onSubmit }) => {
         )}
       </TagList>
       {validationError ? <ErrorMessage>{validationError.message}</ErrorMessage> : null}
-      <SubmitButton
+      <StyledButton
         fluid
         type="submit"
         disabled={isSubmitDisabled}
       >
         Submit
-      </SubmitButton>
+      </StyledButton>
+      {
+        !!onCancel && (
+          <StyledButton
+            fluid
+            type="cancel"
+            onClick={onCancel}
+          >
+            Cancel
+          </StyledButton>
+        )
+      }
     </form>
   );
 }

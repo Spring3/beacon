@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import Toggle from 'react-toggle';
-import Select from 'react-select';
 import 'react-toggle/style.css';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/Button';
@@ -10,6 +9,8 @@ import { EditableSection } from '../components/EditableSection';
 import { useSettings } from '../contexts/SettingsContext';
 import { useSocket } from '../contexts/SocketContext';
 import { ClientEvents } from '../enums/socketEvents';
+import { DepartmentSelector } from '../components/DepartmentSelector';
+import { AbsoluteContainer } from '../components/AbsoluteContainer';
 
 const Wrapper = styled.div`
   display: flex;
@@ -59,8 +60,9 @@ const SettingsList = styled.ul`
 
 const Profile = () => {
   const { logout, user } = useAuth();
+  const [showDepartmentsSelector, setShowDepartmentsSelector] = useState(false);
   const socket = useSocket();
-  const { autoNotify, toggleAutomaticNotification, departments } = useSettings();
+  const { autoNotify, toggleAutomaticNotification, departments, setDepartments } = useSettings();
   return (
     <Wrapper>
       <UserData>
@@ -98,7 +100,7 @@ const Profile = () => {
         </li>
       </SettingsList>
       <TagList>
-        <EditableSection title="Departments" onEdit={() => {}} />
+        <EditableSection title="Departments" onEdit={() => { setShowDepartmentsSelector(true); }} />
         {(departments || []).map((department) => (
           <Tag
             key={department._id}
@@ -109,6 +111,19 @@ const Profile = () => {
           </Tag>
         ))}
       </TagList>
+      {showDepartmentsSelector && (
+        <AbsoluteContainer>
+          <DepartmentSelector
+            onSubmit={(departments) => {
+              setDepartments(departments);
+              setShowDepartmentsSelector(false);
+            }}
+            onCancel={() => {
+              setShowDepartmentsSelector(false);
+            }}
+          />
+        </AbsoluteContainer>
+      )}
     </Wrapper>
   );
 };
